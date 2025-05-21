@@ -1,21 +1,27 @@
 <?php
 
-global $db; 
+use App\Lib\Database;
+use App\Models\Article;
+use App\Models\Category;
 
-$pageTitle = "Edit Article";
+$pageTitle = "Edit Article"; // Default page title
+
+// Initialize form variables
 $article_id = null;
-$title_form = ''; 
-$content_form = '';
+$title_form = '';
+$content_form = ''; // Corresponds to full_text
+$short_description_form = '';
+$date_form = '';
+$selected_category_ids_for_form = []; // For populating checkboxes
 
-
+// Load validation errors from session, if any
 $form_validation_errors = $_SESSION['form_validation_errors'] ?? [];
-$form_data = $_SESSION['form_data'] ?? []; 
+unset($_SESSION['form_validation_errors']); // Clear after loading
 
+$database_handler = new Database();
+$db_connection = $database_handler->getConnection();
 
-unset($_SESSION['form_validation_errors'], $_SESSION['form_data']);
-
-
-if (!$db) {
+if (!$db_connection) {
     $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database connection error. Cannot edit article.']];
     header('Location: /index.php?page=manage_articles');
     exit;
@@ -23,7 +29,7 @@ if (!$db) {
 
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You must be logged in to edit articles.']];
-    $redirect_url = urlencode($_SERVER['REQUEST_URI']); 
+    $redirect_url = urlencode($_SERVER['REQUEST_URI']); // Redirect back to this page after login
     header('Location: /index.php?page=login&redirect=' . $redirect_url);
     exit;
 }
@@ -31,94 +37,110 @@ if (!isset($_SESSION['user_id'])) {
 $current_user_id = (int)$_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'user';
 
-// CSRF token for the edit form
+// CSRF token generation for the edit form
 if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_SESSION['csrf_token_edit_article'])) {
     $_SESSION['csrf_token_edit_article'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token_edit_article'];
 
+// Fetch all categories for the selection field
+$all_categories = Category::findAll($database_handler);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token_edit_article'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($csrf_token, $_POST['csrf_token'])) {
         $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'CSRF Error: Invalid token. Please try again.']];
-        header('Location: /index.php?page=edit_article&id=' . filter_input(INPUT_POST, 'article_id', FILTER_VALIDATE_INT));
+        $post_article_id = filter_input(INPUT_POST, 'article_id', FILTER_VALIDATE_INT);
+        // Redirect back to edit page if possible, otherwise to manage page
+        $redirect_loc = $post_article_id ? '/index.php?page=edit_article&id=' . $post_article_id : '/index.php?page=manage_articles';
+        header('Location: ' . $redirect_loc);
         exit;
     }
 
     $article_id = filter_input(INPUT_POST, 'article_id', FILTER_VALIDATE_INT);
-    $title_form = trim($_POST['title'] ?? ''); // Use $title_form
-    $content_form = trim($_POST['content'] ?? ''); // Use $content_form
+    $title_form = trim(filter_input(INPUT_POST, 'title', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+    $short_description_form = trim(filter_input(INPUT_POST, 'short_description', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+    $content_form = trim(filter_input(INPUT_POST, 'full_text', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+    $date_form = trim(filter_input(INPUT_POST, 'date', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
+    $selected_category_ids_post = filter_input(INPUT_POST, 'categories', FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY) ?? [];
 
-    if (!$article_id) {
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid article ID.']];
-        header('Location: /index.php?page=manage_articles');
-        exit;
-    }
+    // Store submitted data in session for repopulation in case of errors
+    $_SESSION['form_data'] = [
+        'article_id' => $article_id,
+        'title' => $title_form,
+        'short_description' => $short_description_form,
+        'full_text' => $content_form,
+        'date' => $date_form,
+        'categories' => $selected_category_ids_post
+    ];
+    $selected_category_ids_for_form = $selected_category_ids_post; // Use posted categories for immediate form display on error
 
-    if (empty($title_form)) {
-        $form_validation_errors['title'] = "Title cannot be empty.";
-    }
-    if (mb_strlen($title_form) > 255) {
-        $form_validation_errors['title'] = "Title cannot exceed 255 characters.";
-    }
-    if (empty($content_form)) {
-        $form_validation_errors['content'] = "Content cannot be empty.";
+    // Validation
+    if (empty($title_form)) $form_validation_errors['title'] = "Title cannot be empty.";
+    if (empty($content_form)) $form_validation_errors['full_text'] = "Full text cannot be empty.";
+    if (empty($date_form)) {
+        $form_validation_errors['date'] = 'Publication date is required.';
+    } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_form) || !strtotime($date_form)) {
+        $form_validation_errors['date'] = 'Invalid date format. Please use YYYY-MM-DD.';
     }
 
     if (empty($form_validation_errors)) {
+        if (!$article_id) {
+            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid article ID for update.']];
+            header('Location: /index.php?page=manage_articles');
+            exit;
+        }
         try {
-            $stmt_check_author = $db->prepare("SELECT user_id FROM articles WHERE id = ?");
+            $stmt_check_author = $db_connection->prepare("SELECT user_id FROM articles WHERE id = ?");
             $stmt_check_author->execute([$article_id]);
             $original_article_user_id = $stmt_check_author->fetchColumn();
 
             if ($original_article_user_id === false) {
-                 $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found.']];
-                 header('Location: /index.php?page=manage_articles');
-                 exit;
+                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found for update.']];
+                header('Location: /index.php?page=manage_articles');
+                exit;
             }
-
             if ($original_article_user_id != $current_user_id && $user_role !== 'admin') {
                 $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You do not have permission to edit this article.']];
                 header('Location: /index.php?page=manage_articles');
                 exit;
             }
 
-            $sql = "UPDATE articles SET title = ?, full_text = ?, updated_at = NOW() WHERE id = ?";
-            $params = [$title_form, $content_form, $article_id];
-
-            $stmt_update = $db->prepare($sql);
+            $sql = "UPDATE articles SET title = ?, short_description = ?, full_text = ?, date = ?, updated_at = NOW() WHERE id = ?";
+            $params = [$title_form, $short_description_form, $content_form, $date_form, $article_id];
+            
+            $stmt_update = $db_connection->prepare($sql);
             if ($stmt_update->execute($params)) {
+                $article_to_update_categories = Article::findById($database_handler, (int)$article_id);
+                if ($article_to_update_categories) {
+                    $article_to_update_categories->setCategories($database_handler, $selected_category_ids_post);
+                } else {
+                    error_log("Edit_article: Could not find article ID {$article_id} to update categories after main content update.");
+                }
+
                 $_SESSION['flash_messages'] = [['type' => 'success', 'text' => 'Article updated successfully.']];
-                unset($_SESSION['csrf_token_edit_article']); // Unset token on success
+                unset($_SESSION['form_data'], $_SESSION['form_validation_errors'], $_SESSION['csrf_token_edit_article']);
                 header('Location: /index.php?page=manage_articles');
                 exit;
             } else {
-                // Set flash message for the redirect
                 $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Failed to update article. Please try again.']];
                 error_log("Failed to update article ID: $article_id. PDO Error: " . print_r($stmt_update->errorInfo(), true));
-                $_SESSION['form_data'] = $_POST; // Keep form data for repopulation
             }
-        } catch (PDOException $e) {
-            // Set flash message for the redirect
+        } catch (\PDOException $e) {
             $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database error during article update.']];
             error_log("PDOException in edit_article.php (POST): " . $e->getMessage());
-            $_SESSION['form_data'] = $_POST;
         }
-        // If update failed or DB error, redirect back (flash messages are already set)
+        // If update failed or exception occurred, redirect back to edit form (form_data is in session)
         header('Location: /index.php?page=edit_article&id=' . $article_id);
         exit;
-
     } else {
         // Validation errors occurred
-        $_SESSION['form_validation_errors'] = $form_validation_errors;
-        $_SESSION['form_data'] = $_POST; 
+        $_SESSION['form_validation_errors'] = $form_validation_errors; // Put errors back in session
+        // $_SESSION['form_data'] is already set
         $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Please correct the errors below.']];
-        header('Location: /index.php?page=edit_article&id=' . $article_id); 
+        header('Location: /index.php?page=edit_article&id=' . $article_id);
         exit;
     }
-}
-
-else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $article_id_get = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
     if (!$article_id_get) {
@@ -126,97 +148,122 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         header('Location: /index.php?page=manage_articles');
         exit;
     }
-    $article_id = $article_id_get; 
+    $article_id = $article_id_get;
 
-    try {
-        $stmt = $db->prepare("SELECT id, title, full_text, user_id FROM articles WHERE id = ?");
-        $stmt->execute([$article_id]);
-        $article_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Check if there's form data from a failed POST attempt
+    if (isset($_SESSION['form_data']) && isset($_SESSION['form_data']['article_id']) && $_SESSION['form_data']['article_id'] == $article_id) {
+        $form_data_from_session = $_SESSION['form_data'];
+        $title_form = $form_data_from_session['title'] ?? '';
+        $short_description_form = $form_data_from_session['short_description'] ?? '';
+        $content_form = $form_data_from_session['full_text'] ?? '';
+        $date_form = $form_data_from_session['date'] ?? '';
+        $selected_category_ids_for_form = $form_data_from_session['categories'] ?? [];
+        // $form_validation_errors are already loaded at the top of the script
+        unset($_SESSION['form_data']); // Clear form data after use
+    } else {
+        // No session data, fetch from database
+        try {
+            $article_object = Article::findById($database_handler, $article_id);
 
-        if (!$article_data) {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found.']];
+            if (!$article_object) {
+                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found.']];
+                header('Location: /index.php?page=manage_articles');
+                exit;
+            }
+
+            if ($article_object->user_id != $current_user_id && $user_role !== 'admin') {
+                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You do not have permission to edit this article.']];
+                header('Location: /index.php?page=manage_articles');
+                exit;
+            }
+
+            $title_form = $article_object->title;
+            $short_description_form = $article_object->short_description;
+            $content_form = $article_object->full_text;
+            $date_form = $article_object->date;
+
+            $current_article_categories = $article_object->getCategories($database_handler);
+            $selected_category_ids_for_form = array_map(fn($cat) => $cat->id, $current_article_categories);
+
+        } catch (\PDOException $e) {
+            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database error while fetching article.']];
+            error_log("PDOException in edit_article.php (GET) for article ID $article_id: " . $e->getMessage());
             header('Location: /index.php?page=manage_articles');
             exit;
         }
-
-        if ($article_data['user_id'] != $current_user_id && $user_role !== 'admin') {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You do not have permission to edit this article.']];
-            header('Location: /index.php?page=manage_articles');
-            exit;
-        }
-
-        // Populate form fields: use session form_data if available (from failed POST), otherwise DB data
-        $title_form = $form_data['title'] ?? $article_data['title'] ?? ''; 
-        $content_form = $form_data['content'] ?? ($article_data['full_text'] ?? ''); 
-
-        // CSRF token is already set/regenerated at the top for GET requests.
-
-    } catch (PDOException $e) {
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database error while fetching article: ' . $e->getMessage()]];
-        error_log("PDOException in edit_article.php (GET) for article ID $article_id: " . $e->getMessage());
-        header('Location: /index.php?page=manage_articles');
-        exit;
     }
 } else {
+    // Should not happen for this page (only GET or POST)
     $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid request method.']];
     header('Location: /index.php?page=manage_articles');
     exit;
 }
 
+// Set dynamic page title after fetching/setting $title_form and $article_id
+$pageTitle = "Edit Article: " . htmlspecialchars($title_form ?: "ID " . ($article_id ?? 'New'));
+
 ?>
 
-<div class="form-page-container"> <?php // Changed from form-container ?>
+<div class="page-container edit-article-page">
+    <a href="/index.php?page=manage_articles" class="button button-secondary form-page-back-link">&laquo; Back to Manage Articles</a>
     <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-
-    <?php 
-    // The global $page_messages variable (populated in public/index.php) will be displayed
-    // by the theme's template (e.g., header.php or template.php).
-    // So, no need for a specific flash message loop here for general messages.
-    /*
-    <?php if (!empty($flash_messages)): ?>
-        <?php foreach ($flash_messages as $message): ?>
-            <div class="messages <?php echo htmlspecialchars($message['type']); ?>">
-                <p><?php echo htmlspecialchars($message['text']); ?></p>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-    */
-    ?>
-
-    <?php // Display field-specific validation errors if they were set (typically after a redirect from POST) ?>
-    <?php if (!empty($form_validation_errors) && is_array($form_validation_errors)): ?>
-        <?php // This is still relevant for displaying field-specific errors directly on this form page.
-              // The general "Please correct errors" message would come from $page_messages.
-        /*
-        <div class="messages errors">
-            <p>Please correct the following field errors:</p>
-            <ul>
-                <?php foreach ($form_validation_errors as $field_error):?>
-                     <li><?php echo htmlspecialchars($field_error); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        */ ?>
-    <?php endif; ?>
-
-
-    <form action="/index.php?page=edit_article" method="POST">
+    
+    <form action="/index.php?page=edit_article" method="POST" class="styled-form edit-article-form">
         <input type="hidden" name="article_id" value="<?php echo htmlspecialchars($article_id ?? ''); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token ?? ''); ?>">
 
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" class="form-control <?php echo isset($form_validation_errors['title']) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($title_form); ?>" required>
+        <div class="form-group <?php echo isset($form_validation_errors['title']) ? 'has-error' : ''; ?>">
+            <label for="title" class="form-label">Title <span class="required-asterisk">*</span></label>
+            <input type="text" id="title" name="title" class="form-control" value="<?php echo htmlspecialchars($title_form); ?>" required>
             <?php if (isset($form_validation_errors['title'])): ?>
-                <p class="error-text"><?php echo htmlspecialchars($form_validation_errors['title']); ?></p>
+                <p class="error-message"><?php echo htmlspecialchars($form_validation_errors['title']); ?></p>
             <?php endif; ?>
         </div>
 
-        <div class="form-group">
-            <label for="content">Content:</label>
-            <textarea id="content" name="content" rows="10" class="form-control <?php echo isset($form_validation_errors['content']) ? 'is-invalid' : ''; ?>" required><?php echo htmlspecialchars($content_form); ?></textarea>
-            <?php if (isset($form_validation_errors['content'])): ?>
-                <p class="error-text"><?php echo htmlspecialchars($form_validation_errors['content']); ?></p>
+        <div class="form-group <?php echo isset($form_validation_errors['short_description']) ? 'has-error' : ''; ?>">
+            <label for="short_description" class="form-label">Short Description (Preview)</label>
+            <textarea id="short_description" name="short_description" class="form-control" rows="3"><?php echo htmlspecialchars($short_description_form); ?></textarea>
+            <?php if (isset($form_validation_errors['short_description'])): ?>
+                <p class="error-message"><?php echo htmlspecialchars($form_validation_errors['short_description']); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="form-group <?php echo isset($form_validation_errors['full_text']) ? 'has-error' : ''; ?>">
+            <label for="full_text" class="form-label">Full Text <span class="required-asterisk">*</span></label>
+            <textarea id="full_text" name="full_text" class="form-control" rows="10" required><?php echo htmlspecialchars($content_form); ?></textarea>
+            <?php if (isset($form_validation_errors['full_text'])): ?>
+                <p class="error-message"><?php echo htmlspecialchars($form_validation_errors['full_text']); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="form-group <?php echo isset($form_validation_errors['date']) ? 'has-error' : ''; ?>">
+            <label for="date" class="form-label">Publication Date <span class="required-asterisk">*</span></label>
+            <input type="date" id="date" name="date" class="form-control" value="<?php echo htmlspecialchars($date_form); ?>" required>
+            <?php if (isset($form_validation_errors['date'])): ?>
+                <p class="error-message"><?php echo htmlspecialchars($form_validation_errors['date']); ?></p>
+            <?php endif; ?>
+        </div>
+
+        <div class="form-group <?php echo isset($form_validation_errors['categories']) ? 'has-error' : ''; ?>">
+            <label class="form-label">Categories</label>
+            <?php if (!empty($all_categories)): ?>
+                <div class="category-checkbox-group">
+                    <?php foreach ($all_categories as $category_item): ?>
+                        <div class="checkbox-item">
+                            <input type="checkbox"
+                                   id="category_edit_<?php echo htmlspecialchars($category_item->id); ?>"
+                                   name="categories[]"
+                                   value="<?php echo htmlspecialchars($category_item->id); ?>"
+                                   <?php echo in_array($category_item->id, $selected_category_ids_for_form) ? 'checked' : ''; ?>>
+                            <label for="category_edit_<?php echo htmlspecialchars($category_item->id); ?>"><?php echo htmlspecialchars($category_item->name); ?></label>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p class="no-categories-message">No categories available.</p>
+            <?php endif; ?>
+            <?php if (isset($form_validation_errors['categories'])): ?>
+                <p class="error-message"><?php echo htmlspecialchars($form_validation_errors['categories']); ?></p>
             <?php endif; ?>
         </div>
 

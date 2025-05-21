@@ -2,24 +2,18 @@
 
 use App\Models\Article;
 use App\Models\User;
+// use App\Models\Category; // Not directly used, categories are fetched via Article model
 use App\Lib\Database;
 
 $pageTitle = "Manage Articles";
 
-// Flash messages are now handled globally by public/index.php
-// $flash_messages = $_SESSION['flash_messages'] ?? [];
-// unset($_SESSION['flash_messages']);
-
 if (!isset($_SESSION['user_id'])) {
-    // Use flash_messages for the login page
     $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You must be logged in to manage articles.']];
     $redirect_url = urlencode('/index.php?page=manage_articles');
     header('Location: /index.php?page=login&redirect=' . $redirect_url);
     exit;
 }
 
-// CSRF token for delete forms on this page
-// Regenerate if not set or on GET request to ensure it's fresh for the page load
 if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_SESSION['csrf_token_delete_article'])) {
     $_SESSION['csrf_token_delete_article'] = bin2hex(random_bytes(32));
 }
@@ -29,86 +23,111 @@ $current_user_id = (int)$_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'user';
 
 $database_handler = new Database();
-$articles = [];
-$authors = [];
+$articles_view_data = []; // Renamed for clarity: data prepared for view
 $db_connection_error = false;
 
 if (!$database_handler->getConnection()) {
     $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Failed to connect to the database. Article list cannot be loaded.'];
     $db_connection_error = true;
 } else {
-    // Fetch articles based on role
-    if ($user_role === 'admin') {
-        $articles = Article::findAll($database_handler); // Admin sees all articles
-    } else {
-        $articles = Article::findByUserId($database_handler, $current_user_id); // Regular user sees only their articles
-    }
+    $articles = ($user_role === 'admin')
+        ? Article::findAll($database_handler)
+        : Article::findByUserId($database_handler, $current_user_id);
 
     if (!empty($articles)) {
-        $user_ids = array_unique(array_filter(array_column($articles, 'user_id')));
-        if (!empty($user_ids)) {
-            foreach ($user_ids as $uid) {
-                $author = User::findById($database_handler, $uid);
-                $authors[$uid] = $author ? $author->getUsername() : 'Unknown User';
+        $user_ids_to_fetch = array_unique(array_filter(array_map(fn($article) => $article->user_id, $articles)));
+        
+        $authors_map = [];
+        if (!empty($user_ids_to_fetch)) {
+            foreach ($user_ids_to_fetch as $uid) {
+                $author = User::findById($database_handler, $uid); // uid is already int or null
+                $authors_map[$uid] = $author ? $author->getUsername() : 'Unknown User';
             }
+        }
+
+        foreach ($articles as $article) {
+            $categories = ($article instanceof Article && method_exists($article, 'getCategories'))
+                ? $article->getCategories($database_handler)
+                : [];
+
+            $articles_view_data[] = [
+                'id' => $article->id,
+                'title' => $article->title,
+                'date' => $article->date,
+                'user_id' => $article->user_id,
+                'author_name' => $authors_map[$article->user_id] ?? ($article->user_id ? 'User ID: ' . $article->user_id : 'N/A'),
+                'categories' => $categories,
+            ];
         }
     }
 }
 ?>
 
-<div class="admin-content-container">
+<div class="admin-content-container page-container">
     <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
 
     <div class="admin-actions-bar">
         <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create New Article</a>
     </div>
 
-    <?php 
-    // The global $page_messages variable (populated in public/index.php) will be displayed
-    // by the theme's template (e.g., header.php or template.php).
-    // So, no need for a specific flash message loop here.
-    ?>
-
-    <?php if ($db_connection_error && empty($articles)): ?>
-        <?php // Error message already handled by flash_messages if it was a DB connection error ?>
-    <?php elseif (empty($articles) && !$db_connection_error): ?>
+    <?php if ($db_connection_error && empty($articles_view_data)): ?>
+        <?php /* Flash message for DB error is already set */ ?>
+    <?php elseif (empty($articles_view_data) && !$db_connection_error): ?>
         <div class="message message--info message--empty-state">
             <p>No articles found.</p>
             <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create the First Article</a>
         </div>
-    <?php elseif (!empty($articles)): ?>
-        <div class="table-responsive" style="overflow-x: auto;">
-            <table class="styled-table">
+    <?php elseif (!empty($articles_view_data)): ?>
+        <div class="table-responsive">
+            <table class="styled-table articles-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
                         <th>Author</th>
+                        <th>Categories</th>
                         <th>Date</th>
-                        <th style="min-width: 150px;">Actions</th>
+                        <th class="actions-column">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($articles as $article): ?>
+                    <?php foreach ($articles_view_data as $article_item): ?>
                         <tr>
-                            <td><?php echo $article->id; ?></td>
-                            <td><a href="/index.php?page=news&id=<?php echo $article->id; ?>" title="View Article"><?php echo htmlspecialchars(mb_strimwidth($article->title, 0, 70, "...")); ?></a></td>
+                            <td><?php echo $article_item['id']; ?></td>
                             <td>
-                                <?php
-                                echo htmlspecialchars($authors[$article->user_id] ?? ($article->user_id ? 'User ID: ' . $article->user_id : 'N/A'));
-                                ?>
+                                <a href="/index.php?page=news&id=<?php echo $article_item['id']; ?>" title="View Article">
+                                    <?php echo htmlspecialchars(mb_strimwidth($article_item['title'], 0, 60, "...")); ?>
+                                </a>
                             </td>
-                            <td><?php echo htmlspecialchars(date('M j, Y', strtotime($article->date))); ?></td>
-                            <td class="actions-cell">
-                                <?php // Edit button: only if user is author or admin ?>
-                                <?php if ($user_role === 'admin' || $article->user_id == $current_user_id): ?>
-                                    <a href="/index.php?page=edit_article&id=<?php echo $article->id; ?>" class="button button-secondary button-small">Edit</a>
+                            <td><?php echo htmlspecialchars($article_item['author_name']); ?></td>
+                            <td class="categories-cell">
+                                <?php if (!empty($article_item['categories'])): ?>
+                                    <?php
+                                    $category_links = [];
+                                    foreach ($article_item['categories'] as $category) {
+                                        $category_name_safe = htmlspecialchars($category->name);
+                                        $category_slug_safe = htmlspecialchars($category->slug);
+                                        
+                                        $category_links[] = sprintf(
+                                            '<a href="/index.php?page=news&category=%s" class="category-tag-small" title="%s">' .
+                                            '<span style="color: white; text-indent: 0;">%s</span></a>',
+                                            $category_slug_safe,
+                                            $category_name_safe, // Tooltip for the link
+                                            $category_name_safe  // Visible text in span
+                                        );
+                                    }
+                                    echo implode(' ', $category_links);
+                                    ?>
+                                <?php else: ?>
+                                    <span class="text-muted-small">None</span>
                                 <?php endif; ?>
-
-                                <?php // Delete button: only if user is author or admin ?>
-                                <?php if ($user_role === 'admin' || $article->user_id == $current_user_id): ?>
-                                    <form action="/index.php?page=delete_article" method="POST" onsubmit="return confirm('Are you sure you want to delete this article? This action cannot be undone.');" style="display: inline;">
-                                        <input type="hidden" name="article_id" value="<?php echo $article->id; ?>">
+                            </td>
+                            <td><?php echo htmlspecialchars(date('M j, Y', strtotime($article_item['date']))); ?></td>
+                            <td class="actions-cell">
+                                <?php if ($user_role === 'admin' || $article_item['user_id'] == $current_user_id): ?>
+                                    <a href="/index.php?page=edit_article&id=<?php echo $article_item['id']; ?>" class="button button-secondary button-small">Edit</a>
+                                    <form action="/index.php?page=delete_article" method="POST" onsubmit="return confirm('Are you sure you want to delete this article? This action cannot be undone.');" style="display: inline-block; margin-left: 5px;">
+                                        <input type="hidden" name="article_id" value="<?php echo $article_item['id']; ?>">
                                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token_delete); ?>">
                                         <button type="submit" class="button button-danger button-small">Delete</button>
                                     </form>

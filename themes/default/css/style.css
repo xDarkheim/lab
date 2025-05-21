@@ -685,40 +685,33 @@ img {
 }
 
 
-
-/* Стили для формы на страницах аутентификации */
+/* ==========================================================================
+   Authentication Pages
+   ========================================================================== */
 .auth-form-panel {
-    max-width: 720px; /* Новая, большая максимальная ширина. Подберите значение по вкусу. */
-    margin: 0 auto;   /* Центрирование формы, если она уже чем .main-content */
-    /* Если вы хотите, чтобы сама форма имела фон/рамку, отличные от .main-content, добавьте их сюда.
-       Например:
-       background-color: var(--color-surface-accent); // Чуть другой фон для самой формы
-       padding: var(--spacing-4); // Внутренние отступы для формы
-       border-radius: var(--border-radius-md);
-       border: 1px solid var(--color-border-light);
-       box-shadow: var(--shadow-sm); // Меньшая тень, если .main-content уже имеет тень
-    */
+    max-width: 720px; 
+    margin: 0 auto;   
 }
 
-.auth-page-main-title.page-title, /* Этот селектор должен применяться к <h1 class="page-title"> */
-.auth-page-container > .page-title { /* Или более общий селектор, если h1 имеет только класс page-title */
+.auth-page-main-title.page-title, 
+.auth-page-container > .page-title { 
     text-align: center;
     margin-top: 0; 
-    margin-bottom: var(--spacing-3); /* Уменьшим немного отступ, если предупреждение близко */
+    margin-bottom: var(--spacing-3); 
     width: 100%;
     display: block;
 }
 
 /* Warning Message on Auth Pages */
 .auth-warning-message {
-    max-width: 600px; /* Ограничим ширину для лучшей читаемости */
-    margin: 0 auto var(--spacing-4) auto; /* Центрируем и добавляем отступ снизу */
+    max-width: 600px; 
+    margin: 0 auto var(--spacing-4) auto; 
     padding: var(--spacing-3);
-    background-color: rgba(var(--color-warning-rgb, 255, 193, 7), 0.1); /* Светлый фон предупреждения */
-    border: 1px solid var(--color-warning, #FFC107); /* Рамка в цвет предупреждения */
-    border-left-width: 5px; /* Акцентная левая рамка */
+    background-color: rgba(var(--color-warning-rgb, 255, 193, 7), 0.1); 
+    border: 1px solid var(--color-warning, #FFC107); 
+    border-left-width: 5px; 
     border-radius: var(--border-radius-md);
-    color: var(--color-text); /* Основной цвет текста */
+    color: var(--color-text);
     width: 100%;
     box-sizing: border-box;
     display: block;
@@ -1073,15 +1066,17 @@ input[type="radio"]:checked {
 input[type="checkbox"]:checked::before {
     content: '';
     display: block;
-    width: 0.65em;
-    height: 0.35em;
-    border: solid var(--color-primary-contrast);
-    border-width: 0 0.15em 0.15em 0;
-    transform: rotate(45deg) translate(-50%, -50%);
     position: absolute;
+    /* Корректируем пропорции и толщину для лучшей видимости */
+    width: 0.3em; /* Ширина короткой части галочки (было 0.65em) */
+    height: 0.6em; /* Высота длинной части галочки (было 0.35em) */
+    border: solid var(--color-primary-contrast); /* Цвет галочки (белый) */
+    border-width: 0 0.2em 0.2em 0; /* Толщина линий: нет верхней, правая, нижняя, нет левой (было 0.15em) */
+    transform: rotate(45deg) translate(-50%, -50%);
     left: 50%;
-    top: 45%; /* Slight adjustment for visual centering */
+    top: 42%; /* Слегка корректируем позицию по вертикали для визуального центра (было 45%) */
 }
+
 input[type="radio"]:checked::before {
     content: '';
     display: block;
@@ -1223,6 +1218,67 @@ select.is-valid:focus {
     margin: var(--spacing-4) auto;
 }
 
+/* Styling for Category Checkbox Group in Forms */
+.category-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1); /* Slightly reduced gap between items for a tighter list */
+    padding: var(--spacing-2); /* Adjusted padding */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-surface-accent); /* Use a theme-appropriate dark background */
+    max-height: 250px; /* Increased max-height slightly */
+    overflow-y: auto;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-2); /* Add padding to the item itself for better hover */
+    border-radius: var(--border-radius-sm);
+    transition: background-color var(--transition-duration) ease;
+}
+
+.checkbox-item:hover {
+    background-color: rgba(var(--color-primary-rgb), 0.1); /* Subtle hover effect using primary color */
+}
+
+/* Ensure global custom checkbox styles apply. This selector just adds margin. */
+.checkbox-item input[type="checkbox"] {
+    margin-right: var(--spacing-2);
+    flex-shrink: 0; /* Prevent checkbox from shrinking if label is long */
+    /* The appearance (checkmark, size, etc.) should come from global styles:
+       input[type="checkbox"] { ... } in your style.css around line 900+
+       If those global styles are not applying as expected, ensure their specificity
+       or copy relevant parts here, but ideally, rely on the global ones.
+    */
+}
+
+.checkbox-item label {
+    font-weight: var(--font-weight-normal);
+    margin-bottom: 0;
+    color: var(--color-text);
+    cursor: pointer;
+    line-height: 1.4; /* Ensure consistent line height */
+    flex-grow: 1; /* Allow label to take available space */
+}
+
+/* Style for the "No categories available" message */
+.no-categories-message {
+    padding: var(--spacing-3);
+    text-align: center;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-accent);
+    border: 1px dashed var(--color-border-light);
+    border-radius: var(--border-radius-md);
+    margin-top: var(--spacing-2); /* Add some margin if it appears */
+}
+
+/* Optional: Style for when a form group (containing the categories) has an error */
+.form-group.has-error .category-checkbox-group {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 1px var(--color-danger); /* Subtle glow for error */
+}
 
 /* ==========================================================================
    Messages / Alerts
@@ -1333,16 +1389,56 @@ select.is-valid:focus {
     margin-bottom: var(--spacing-2);
 }
 .article-meta {
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm, 0.9rem);
     color: var(--color-text-muted);
-    margin-bottom: var(--spacing-3);
-    display: flex;
+    margin-bottom: var(--spacing-4);
+    display: flex; /* Allow items to wrap and align nicely */
     flex-wrap: wrap;
-    gap: var(--spacing-3);
+    gap: var(--spacing-1) var(--spacing-3); /* row-gap column-gap */
+    align-items: center;
 }
-.article-meta p {
-    margin-bottom: 0;
+
+.article-meta p,
+.article-meta span,
+.article-meta .article-categories-display { /* Include category display here */
+    margin-bottom: 0; /* Remove bottom margin as gap handles spacing */
+    margin-right: 0; /* Remove right margin as gap handles spacing */
 }
+
+.article-meta .author-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+/* NEW STYLES FOR CATEGORY DISPLAY */
+.article-categories-display {
+    font-size: var(--font-size-sm, 0.9rem); /* Consistent with other meta */
+    color: var(--color-text-muted); /* Consistent with other meta */
+}
+
+.article-categories-display span { /* "Categories: " text */
+    margin-right: var(--spacing-1);
+    font-weight: var(--font-weight-normal); /* Keep it normal weight */
+}
+
+.category-tag {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    background-color: var(--color-primary-ultralight, #e9f2ff);
+    padding: var(--spacing-0) var(--spacing-1);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid transparent; /* for hover effect consistency */
+    transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+}
+
+.category-tag:hover {
+    text-decoration: none; /* Often links in tags don't get underlined */
+    color: var(--color-primary-dark);
+    background-color: var(--color-primary-light, #d1e3ff);
+    border-color: var(--color-primary-lighter, #b8d4fe);
+}
+
 
 .article-content {
     line-height: 1.8; /* More readable for long text */
@@ -1735,38 +1831,129 @@ hr.section-divider { /* For <hr> between settings sections */
 .styled-table {
     width: 100%;
     border-collapse: collapse; /* Remove gaps between cells */
-    font-size: 0.9rem;
+    background-color: var(--color-surface-accent, var(--color-background)); /* Table background */
+    color: var(--color-text); /* Text color */
+    font-size: var(--font-size-sm, 0.9rem); /* Font size */
 }
+
 .styled-table th,
 .styled-table td {
-    padding: var(--spacing-2) var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-3); /* Cell padding */
     text-align: left;
-    border-bottom: 1px solid var(--color-border);
-    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border, #dee2e6); /* Horizontal dividers */
+    vertical-align: middle; /* Vertical alignment */
 }
+
 .styled-table thead th {
-    background-color: var(--color-surface); /* Slightly different from table body rows */
-    color: var(--color-headings);
-    font-weight: 600;
+    background-color: var(--color-surface-header, var(--color-primary-ultralight)); /* Header background */
+    color: var(--color-headings-table, var(--color-primary-dark)); /* Header text color */
+    font-weight: var(--font-weight-semibold, 600);
     border-bottom-width: 2px; /* Thicker border below header */
-    border-color: var(--color-border-light);
+    border-color: var(--color-primary, #007bff); /* Header border color */
+    white-space: nowrap; /* Prevent text wrapping in headers */
 }
-.styled-table tbody tr:last-child td {
-    border-bottom: none; /* No border for the last row */
+
+.styled-table tbody tr {
+    transition: background-color 0.15s ease-in-out;
 }
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: var(--color-surface-zebra, rgba(0,0,0,0.02)); /* Alternating row background */
+}
+
 .styled-table tbody tr:hover {
-    background-color: rgba(var(--color-primary-rgb), 0.05); /* Subtle hover effect */
+    background-color: var(--color-surface-hover, rgba(var(--color-primary-rgb), 0.075)); /* Row hover background */
 }
+
+.styled-table td a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+.styled-table td a:hover {
+    text-decoration: underline;
+    color: var(--color-primary-dark);
+}
+
+/* Action cell */
 .styled-table .actions-cell {
-    text-align: right;
-    white-space: nowrap;
+    white-space: nowrap; /* Prevent button wrapping */
+    min-width: 160px; /* Minimum width for buttons */
 }
-.styled-table .actions-cell form {
-    display: inline-block; /* Keep delete button next to edit */
-    margin-left: var(--spacing-1);
-}
+
 .styled-table .actions-cell .button {
-    margin-left: var(--spacing-1);
+    margin-right: var(--spacing-2);
+    margin-bottom: var(--spacing-1); /* For stacked buttons on mobile */
+    padding: var(--button-padding-y-sm, 0.25rem) var(--button-padding-x-sm, 0.5rem); /* Small buttons */
+    font-size: var(--font-size-xs, 0.8rem);
+}
+.styled-table .actions-cell .button:last-child {
+    margin-right: 0;
+}
+
+.styled-table .actions-cell form {
+    display: inline-block; /* Inline forms for buttons */
+    margin: 0;
+}
+
+/* Table responsiveness */
+@media (max-width: 768px) {
+    .admin-content-container h1 {
+        font-size: var(--font-size-xl, 2rem);
+    }
+    .admin-actions-bar {
+        justify-content: center; /* Center button on mobile */
+    }
+    .styled-table th,
+    .styled-table td {
+        padding: var(--spacing-2); /* Reduce cell padding */
+        font-size: var(--font-size-xs, 0.85rem); /* Reduce font size */
+    }
+    .styled-table .actions-cell .button {
+        display: block; /* Stack buttons */
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: var(--spacing-2);
+    }
+    .styled-table .actions-cell .button:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Styles for category tags in the articles management table */
+.articles-table .categories-cell {
+    min-width: 150px; /* Prevent tags from collapsing too much */
+}
+
+.category-tag-small {
+    font-size: 0.75rem; /* Using a fixed value as --font-size-xs is not defined */
+    padding: 0 var(--spacing-1); /* Use 0 for top/bottom padding */
+    color: var(--color-primary-contrast); 
+    background-color: var(--color-primary); 
+    border-radius: var(--border-radius-sm); /* Using --border-radius-sm */
+    text-decoration: none;
+    font-weight: var(--font-weight-normal);
+    border: 1px solid var(--color-primary-dark); 
+    display: inline-block;
+    margin: 2px; /* Small margin between tags */
+    line-height: 1.4;
+    transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+}
+
+.category-tag-small:hover {
+    color: var(--color-primary-contrast); /* Use defined variable for white */
+    background-color: var(--color-primary-dark); 
+    border-color: var(--color-primary-light);
+    text-decoration: none;
+}
+
+.text-muted-small {
+    font-size: var(--font-size-sm, 0.875rem); 
+    color: var(--color-text-muted);
+}
+
+.articles-table .actions-column {
+    min-width: 180px; /* Provide more space for Edit/Delete buttons */
 }
 
 /* Hero Section (e.g., on homepage) */
@@ -1888,37 +2075,69 @@ hr.section-divider { /* For <hr> between settings sections */
     color: var(--color-headings);
     margin-top: 0;
     margin-bottom: var(--spacing-3);
-    line-height: 1.2;
 }
 
 .article-meta {
     font-size: var(--font-size-sm, 0.9rem);
     color: var(--color-text-muted);
     margin-bottom: var(--spacing-4);
-    padding-bottom: var(--spacing-3);
-    border-bottom: 1px solid var(--color-border-extralight, #f0f0f0);
+    display: flex; /* Allow items to wrap and align nicely */
+    flex-wrap: wrap;
+    gap: var(--spacing-1) var(--spacing-3); /* row-gap column-gap */
+    align-items: center;
 }
+
 .article-meta p,
-.article-meta span { /* Для элементов меты в ленте */
-    display: inline-block; /* Располагаем дату и автора в одну строку */
-    margin-right: var(--spacing-3);
-    margin-bottom: var(--spacing-1); /* Небольшой отступ снизу, если переносятся */
+.article-meta span,
+.article-meta .article-categories-display { /* Include category display here */
+    margin-bottom: 0; /* Remove bottom margin as gap handles spacing */
+    margin-right: 0; /* Remove right margin as gap handles spacing */
 }
+
 .article-meta .author-name {
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
 }
 
+/* NEW STYLES FOR CATEGORY DISPLAY */
+.article-categories-display {
+    font-size: var(--font-size-sm, 0.9rem); /* Consistent with other meta */
+    color: var(--color-text-muted); /* Consistent with other meta */
+}
+
+.article-categories-display span { /* "Categories: " text */
+    margin-right: var(--spacing-1);
+    font-weight: var(--font-weight-normal); /* Keep it normal weight */
+}
+
+.category-tag {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    background-color: var(--color-primary-ultralight, #e9f2ff);
+    padding: var(--spacing-0) var(--spacing-1);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid transparent; /* for hover effect consistency */
+    transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+}
+
+.category-tag:hover {
+    text-decoration: none; /* Often links in tags don't get underlined */
+    color: var(--color-primary-dark);
+    background-color: var(--color-primary-light, #d1e3ff);
+    border-color: var(--color-primary-lighter, #b8d4fe);
+}
+
 .article-content {
-    font-size: var(--font-size-md, 1rem); /* Размер основного текста статьи */
-    line-height: 1.8; /* Увеличенный межстрочный интервал для читаемости */
+    font-size: var(--font-size-md, 1rem); 
+    line-height: 1.8; 
     color: var(--color-text-main);
     margin-bottom: var(--spacing-5);
 }
 .article-content p {
     margin-bottom: var(--spacing-3);
 }
-.article-content h2, .article-content h3, .article-content h4 { /* Стили для подзаголовков внутри статьи */
+.article-content h2, .article-content h3, .article-content h4 { 
     margin-top: var(--spacing-4);
     margin-bottom: var(--spacing-2);
     color: var(--color-headings);
@@ -1934,7 +2153,7 @@ hr.section-divider { /* For <hr> between settings sections */
     font-style: italic;
     color: var(--color-text-secondary);
 }
-.article-content pre { /* Для блоков кода, если будут */
+.article-content pre { 
     background-color: var(--color-surface-code, var(--color-background-alt));
     padding: var(--spacing-3);
     border-radius: var(--border-radius-md);
@@ -1948,7 +2167,7 @@ hr.section-divider { /* For <hr> between settings sections */
     background-color: var(--color-surface-accent, var(--color-background-alt)); /* Легкий фон для блока фильтра */
     padding: var(--spacing-3) var(--spacing-4);
     border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-5); /* Отступ под блоком категорий */
+    margin-bottom: var(--spacing-5);
     border: 1px solid var(--color-border-light, #eee);
 }
 
@@ -1963,15 +2182,15 @@ hr.section-divider { /* For <hr> between settings sections */
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex; /* Располагаем категории в ряд */
-    flex-wrap: wrap; /* Позволяем переноситься на новую строку */
-    gap: var(--spacing-2); /* Пространство между категориями */
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
 }
 
 .category-link {
     display: inline-block;
     padding: var(--spacing-2) var(--spacing-3);
-    background-color: var(--color-surface, #fff); /* Фон для кнопки категории */
+    background-color: var(--color-surface, #fff); 
     color: var(--color-text);
     text-decoration: none;
     border-radius: var(--border-radius-md);
@@ -1988,12 +2207,12 @@ hr.section-divider { /* For <hr> between settings sections */
 
 .category-link.is-active {
     background-color: var(--color-primary);
-    color: var(--color-button-text, #fff); /* Цвет текста для активной кнопки */
+    color: var(--color-button-text, #fff); 
     border-color: var(--color-primary-dark, var(--color-primary));
     font-weight: var(--font-weight-semibold);
 }
 .category-link.is-active:hover {
-    background-color: var(--color-primary-dark); /* Чуть темнее при наведении на активную */
+    background-color: var(--color-primary-dark); 
     color: var(--color-button-text, #fff);
 }
 
@@ -2001,11 +2220,11 @@ hr.section-divider { /* For <hr> between settings sections */
 /* --- News Feed View (List of Articles) --- */
 
 .news-feed-item {
-    background-color: var(--color-surface, #fff); /* Фон для каждого элемента ленты */
+    background-color: var(--color-surface, #fff); 
     padding: var(--spacing-4);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm); /* Меньшая тень для элементов ленты */
-    margin-bottom: var(--spacing-5); /* Отступ между статьями в ленте */
+    box-shadow: var(--shadow-sm); 
+    margin-bottom: var(--spacing-5); 
     border: 1px solid var(--color-border-light, #eee);
 }
 .news-feed-item:last-child {
@@ -2013,7 +2232,7 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .news-feed-item-title {
-    font-size: var(--font-size-xl, 1.8rem); /* Заголовок статьи в ленте */
+    font-size: var(--font-size-xl, 1.8rem); 
     margin-top: 0;
     margin-bottom: var(--spacing-2);
 }
@@ -2026,7 +2245,6 @@ hr.section-divider { /* For <hr> between settings sections */
     color: var(--color-primary);
 }
 
-/* .article-meta стили уже определены выше и подойдут для ленты */
 
 .news-feed-item-content {
     font-size: var(--font-size-md, 1rem);
@@ -2040,8 +2258,7 @@ hr.section-divider { /* For <hr> between settings sections */
 
 .news-feed-item .read-more-link.button.button-outline.button-small {
     margin-top: var(--spacing-3);
-    align-self: flex-start; /* Кнопка не растягивается */
-    /* Дополнительные стили для кнопки "Read More", если нужно */
+    align-self: flex-start;
 }
 
 
@@ -2085,7 +2302,7 @@ hr.section-divider { /* For <hr> between settings sections */
     font-size: var(--font-size-sm, 0.9rem);
     line-height: 1.6;
     color: var(--color-text-secondary);
-    white-space: pre-wrap; /* Сохраняем переносы строк */
+    white-space: pre-wrap;
 }
 .comment-content p:last-child {
     margin-bottom: 0;
@@ -2110,7 +2327,6 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 .comment-form textarea.form-control {
     min-height: 100px;
-    /* Стили для .form-control должны наследоваться */
 }
 .comment-form .button {
     margin-top: var(--spacing-3);
@@ -2125,18 +2341,11 @@ hr.section-divider { /* For <hr> between settings sections */
     font-weight: var(--font-weight-medium);
 }
 
-/* --- Edit Profile / Account Settings Page Styles --- */
-
-/* Используем .form-page-container как основной контейнер,
-   .account-settings-container для специфичных настроек, если нужно */
 
 .account-settings-container h1 {
-    /* Стили для h1 уже должны быть покрыты .form-page-container h1 */
-    /* Если нужен другой стиль, можно добавить сюда */
     margin-bottom: var(--spacing-5);
 }
 
-/* Секции настроек (например, Profile Details, Change Password) */
 .settings-section {
     background-color: var(--color-surface-accent, var(--color-background-alt)); /* Слегка другой фон для секции */
     padding: var(--spacing-4);
@@ -2154,18 +2363,17 @@ hr.section-divider { /* For <hr> between settings sections */
     border-bottom: 1px solid var(--color-border, #ddd);
 }
 
-/* Стили для каждого элемента настройки (метка + поле ввода) */
 .setting-item {
     display: flex;
-    flex-wrap: wrap; /* Позволит переноситься на мобильных */
-    gap: var(--spacing-3); /* Пространство между меткой и полем */
+    flex-wrap: wrap; 
+    gap: var(--spacing-3); 
     margin-bottom: var(--spacing-4);
-    align-items: flex-start; /* Выравнивание по верху, если описания разной длины */
+    align-items: flex-start;
 }
 
 .setting-label {
-    flex: 1 1 250px; /* Метка занимает часть ширины, но может сжиматься/растягиваться */
-    min-width: 200px; /* Минимальная ширина для блока с меткой */
+    flex: 1 1 250px;
+    min-width: 200px;
 }
 
 .setting-label label {
@@ -2173,7 +2381,7 @@ hr.section-divider { /* For <hr> between settings sections */
     font-weight: var(--font-weight-semibold, 600);
     font-size: var(--font-size-md, 1rem);
     color: var(--color-text);
-    margin-bottom: var(--spacing-1); /* Меньший отступ, так как есть описание */
+    margin-bottom: var(--spacing-1);
 }
 
 .setting-label .setting-description {
@@ -2184,53 +2392,45 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .setting-control {
-    flex: 2 1 400px; /* Поле ввода занимает больше места */
-    min-width: 250px; /* Минимальная ширина для поля ввода */
+    flex: 2 1 400px;
+    min-width: 250px;
 }
 
-/* Стили для .form-control, .form-control:focus, .is-invalid, .error-text
-   должны наследоваться от общих стилей для .form-page-container,
-   которые мы определили ранее. Если нужны специфичные переопределения,
-   можно добавить их сюда с селектором .account-settings-container ... */
 
 .account-settings-container .form-control[disabled] {
-    background-color: var(--color-surface-disabled, #e9ecef); /* Фон для неактивных полей */
+    background-color: var(--color-surface-disabled, #e9ecef);
     color: var(--color-text-disabled, #6c757d);
     cursor: not-allowed;
     border-color: var(--color-border-disabled, #ced4da);
-    box-shadow: none; /* Убираем тень у неактивных полей */
+    box-shadow: none;
 }
 .account-settings-container textarea.form-control {
-    min-height: 100px; /* Стандартная высота для textarea */
+    min-height: 100px;
 }
 
 
-/* Блок с кнопками действий внутри формы */
+
 .account-settings-container .form-actions.setting-actions {
-    /* Стили для .form-actions уже должны быть (flex, justify-content: flex-end и т.д.) */
-    /* Если нужно специфичное выравнивание или отступы для этой страницы: */
-    margin-top: var(--spacing-4); /* Отступ перед кнопками */
+    margin-top: var(--spacing-4); 
     padding-top: var(--spacing-4);
     border-top: 1px solid var(--color-border-light, #eee);
 }
 
-/* Секция с ссылкой "Назад на дашборд" */
 .account-settings-container .page-actions {
     margin-top: var(--spacing-5);
-    text-align: center; /* Или left/right по вашему усмотрению */
+    text-align: center; 
 }
 
 
-/* Адаптивность для страницы настроек */
 @media (max-width: 768px) {
     .setting-item {
-        flex-direction: column; /* Метка и поле друг под другом */
+        flex-direction: column; 
         gap: var(--spacing-2);
-        align-items: stretch; /* Растягиваем элементы на всю ширину */
+        align-items: stretch; 
     }
     .setting-label {
-        flex-basis: auto; /* Сбрасываем flex-basis */
-        margin-bottom: var(--spacing-2); /* Отступ под блоком метки */
+        flex-basis: auto;
+        margin-bottom: var(--spacing-2);
         min-width: auto;
     }
     .setting-control {
@@ -2243,10 +2443,10 @@ hr.section-divider { /* For <hr> between settings sections */
 /* --- Manage Articles Page (Admin-like Table View) Styles --- */
 
 .admin-content-container {
-    max-width: 1200px; /* Шире, так как таблицы могут быть большими */
+    max-width: 1200px;
     margin: var(--spacing-5) auto;
     padding: var(--spacing-4);
-    background-color: var(--color-surface, #fff); /* Фон контейнера */
+    background-color: var(--color-surface, #fff);
 }
 
 .admin-content-container h1 {
@@ -2262,14 +2462,13 @@ hr.section-divider { /* For <hr> between settings sections */
     padding-bottom: var(--spacing-4);
     border-bottom: 1px solid var(--color-border-light, #eee);
     display: flex;
-    justify-content: flex-end; /* Кнопка "Create New" справа */
+    justify-content: flex-end; 
 }
 
 
-/* Стили для сообщений (если они будут отображаться здесь, например, "No articles found") */
 .admin-content-container .message {
     padding: var(--spacing-3) var(--spacing-4);
-    margin: var(--spacing-4) 0; /* Отступы сверху и снизу */
+    margin: var(--spacing-4) 0; 
     border-radius: var(--border-radius-md);
     border-width: 1px;
     border-style: solid;
@@ -2282,7 +2481,7 @@ hr.section-divider { /* For <hr> between settings sections */
     border-color: var(--color-info, #0dcaf0);
     color: var(--color-info-dark, #087990);
 }
-.admin-content-container .message--empty-state { /* Для состояния "нет данных" */
+.admin-content-container .message--empty-state {
     text-align: center;
     padding: var(--spacing-5) var(--spacing-4);
 }
@@ -2295,39 +2494,39 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 
-/* Стили для таблицы */
+
 .table-responsive {
     width: 100%;
-    overflow-x: auto; /* Горизонтальный скролл для таблицы на малых экранах */
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-    border: 1px solid var(--color-border, #dee2e6); /* Граница вокруг обертки таблицы */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--color-border, #dee2e6);
     border-radius: var(--border-radius-md);
     margin-bottom: var(--spacing-4);
 }
 
 .styled-table {
     width: 100%;
-    border-collapse: collapse; /* Убираем двойные границы */
-    background-color: var(--color-surface-accent, var(--color-background)); /* Фон таблицы, если отличается от фона контейнера */
-    color: var(--color-text); /* Основной цвет текста в таблице */
-    font-size: var(--font-size-sm, 0.9rem); /* Размер шрифта для таблицы */
+    border-collapse: collapse;
+    background-color: var(--color-surface-accent, var(--color-background));
+    color: var(--color-text);
+    font-size: var(--font-size-sm, 0.9rem);
 }
 
 .styled-table th,
 .styled-table td {
-    padding: var(--spacing-3) var(--spacing-3); /* Отступы в ячейках */
+    padding: var(--spacing-3) var(--spacing-3);
     text-align: left;
-    border-bottom: 1px solid var(--color-border, #dee2e6); /* Горизонтальные разделители */
-    vertical-align: middle; /* Выравнивание по центру по вертикали */
+    border-bottom: 1px solid var(--color-border, #dee2e6);
+    vertical-align: middle;
 }
 
 .styled-table thead th {
-    background-color: var(--color-surface-header, var(--color-primary-ultralight)); /* Фон заголовков таблицы */
-    color: var(--color-headings-table, var(--color-primary-dark)); /* Цвет текста заголовков */
+    background-color: var(--color-surface-header, var(--color-primary-ultralight));
+    color: var(--color-headings-table, var(--color-primary-dark));
     font-weight: var(--font-weight-semibold, 600);
-    border-bottom-width: 2px; /* Более жирная нижняя граница для заголовков */
-    border-color: var(--color-primary, #007bff); /* Цвет границы заголовков */
-    white-space: nowrap; /* Предотвращаем перенос текста в заголовках */
+    border-bottom-width: 2px;
+    border-color: var(--color-primary, #007bff);
+    white-space: nowrap;
 }
 
 .styled-table tbody tr {
@@ -2335,12 +2534,11 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .styled-table tbody tr:nth-of-type(even) {
-    background-color: var(--color-surface-zebra, rgba(0,0,0,0.02)); /* Чередование строк, если фон таблицы светлый */
-    /* Если фон таблицы темный, чередование может не понадобиться или быть другим */
+    background-color: var(--color-surface-zebra, rgba(0,0,0,0.02));
 }
 
 .styled-table tbody tr:hover {
-    background-color: var(--color-surface-hover, rgba(var(--color-primary-rgb), 0.075)); /* Подсветка строки при наведении */
+    background-color: var(--color-surface-hover, rgba(var(--color-primary-rgb), 0.075));
 }
 
 .styled-table td a {
@@ -2353,16 +2551,15 @@ hr.section-divider { /* For <hr> between settings sections */
     color: var(--color-primary-dark);
 }
 
-/* Ячейка с действиями */
 .styled-table .actions-cell {
-    white-space: nowrap; /* Предотвращаем перенос кнопок */
-    min-width: 160px; /* Минимальная ширина для кнопок */
+    white-space: nowrap; 
+    min-width: 160px; 
 }
 
 .styled-table .actions-cell .button {
     margin-right: var(--spacing-2);
-    margin-bottom: var(--spacing-1); /* Для случая, если кнопки переносятся на мобильных */
-    padding: var(--button-padding-y-sm, 0.25rem) var(--button-padding-x-sm, 0.5rem); /* Маленькие кнопки */
+    margin-bottom: var(--spacing-1); 
+    padding: var(--button-padding-y-sm, 0.25rem) var(--button-padding-x-sm, 0.5rem);
     font-size: var(--font-size-xs, 0.8rem);
 }
 .styled-table .actions-cell .button:last-child {
@@ -2370,29 +2567,26 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .styled-table .actions-cell form {
-    display: inline-block; /* Формы для кнопок в одну строку */
+    display: inline-block; 
     margin: 0;
 }
 
 
-/* Адаптивность для таблицы */
+
 @media (max-width: 768px) {
     .admin-content-container h1 {
         font-size: var(--font-size-xl, 2rem);
     }
     .admin-actions-bar {
-        justify-content: center; /* Кнопка по центру на мобильных */
+        justify-content: center; 
     }
-    /* На очень маленьких экранах можно скрыть некоторые колонки или изменить отображение таблицы,
-       но это требует более сложной логики или JavaScript.
-       Пока что .table-responsive обеспечит горизонтальный скролл. */
     .styled-table th,
     .styled-table td {
-        padding: var(--spacing-2); /* Уменьшаем отступы в ячейках */
-        font-size: var(--font-size-xs, 0.85rem); /* Уменьшаем шрифт */
+        padding: var(--spacing-2);
+        font-size: var(--font-size-xs, 0.85rem);
     }
     .styled-table .actions-cell .button {
-        display: block; /* Кнопки одна под другой для экономии места */
+        display: block; 
         width: 100%;
         margin-right: 0;
         margin-bottom: var(--spacing-2);
@@ -2405,28 +2599,28 @@ hr.section-divider { /* For <hr> between settings sections */
 /* --- Create/Edit Article Form Page Styles --- */
 
 .form-page-container {
-    max-width: 800px; /* Оптимальная ширина для форм */
+    max-width: 800px;
     margin: var(--spacing-5) auto;
     padding: var(--spacing-5);
-    background-color: var(--color-surface, #fff); /* Фон контейнера формы */
+    background-color: var(--color-surface, #fff);
 }
 
-.form-page-back-link { /* Стиль для кнопки "Назад" */
-    margin-bottom: var(--spacing-4); /* Используем переменную для отступа */
+.form-page-back-link {
+    margin-bottom: var(--spacing-4);
     display: inline-block;
-    font-size: var(--font-size-sm); /* Можно сделать ее чуть меньше */
+    font-size: var(--font-size-sm);
 }
 
-.form-page-container .page-title, /* Если у вас есть общий класс для заголовков страниц */
+.form-page-container .page-title,
 .form-page-container h1 {
-    font-size: var(--font-size-xxl, 2.5rem); /* Размер заголовка */
+    font-size: var(--font-size-xxl, 2.5rem);
     color: var(--color-headings, var(--color-primary));
     text-align: center;
-    margin-top: 0; /* Убираем верхний отступ, если он уже есть у контейнера */
-    margin-bottom: var(--spacing-5); /* Отступ под заголовком */
+    margin-top: 0;
+    margin-bottom: var(--spacing-5);
 }
 
-/* Общие стили для сообщений (flash_messages) */
+/* General styles for messages (flash_messages) */
 .form-page-container .messages {
     padding: var(--spacing-3) var(--spacing-4);
     margin-bottom: var(--spacing-4);
@@ -2434,18 +2628,18 @@ hr.section-divider { /* For <hr> between settings sections */
     border-width: 1px;
     border-style: solid;
     font-size: var(--font-size-md);
-    display: flex; /* Для возможного добавления иконки */
+    display: flex;
     align-items: center;
 }
 .form-page-container .messages p {
     margin: 0;
     flex-grow: 1;
 }
-/* Иконки для сообщений (пример, можно использовать SVG или font icons) */
+/* Icons for messages (example, can use SVG or font icons) */
 .form-page-container .messages::before {
-    /* content: ''; */ /* Задается ниже для каждого типа */
+    /* content: ''; */
     margin-right: var(--spacing-2);
-    font-size: 1.2em; /* Размер иконки */
+    font-size: 1.2em;
 }
 
 .form-page-container .messages.success {
@@ -2453,51 +2647,51 @@ hr.section-divider { /* For <hr> between settings sections */
     border-color: var(--color-success, #198754);
     color: var(--color-success-dark, #12613c);
 }
-/* .form-page-container .messages.success::before { content: '✔'; } */ /* Пример иконки */
+/* .form-page-container .messages.success::before { content: '✔'; } */
 
 .form-page-container .messages.error {
     background-color: rgba(var(--color-danger-rgb, 220, 53, 69), 0.1);
     border-color: var(--color-danger, #dc3545);
     color: var(--color-danger-dark, #a32835);
 }
-/* .form-page-container .messages.error::before { content: '✖'; } */ /* Пример иконки */
+/* .form-page-container .messages.error::before { content: '✖'; } */
 
 .form-page-container .messages.info {
     background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.1);
     border-color: var(--color-info, #0dcaf0);
     color: var(--color-info-dark, #087990);
 }
-/* .form-page-container .messages.info::before { content: 'ℹ'; } */ /* Пример иконки */
+/* .form-page-container .messages.info::before { content: 'ℹ'; } */
 
 
-/* Стили для групп полей формы */
+/* Styles for form field groups */
 .form-page-container .form-group {
-    margin-bottom: var(--spacing-4); /* Отступ между группами полей */
+    margin-bottom: var(--spacing-4);
 }
 
 .form-page-container .form-label,
-.form-page-container label { /* Общий стиль для label */
+.form-page-container label {
     display: block;
     margin-bottom: var(--spacing-2);
-    font-weight: var(--font-weight-semibold, 600); /* Более жирные метки */
+    font-weight: var(--font-weight-semibold, 600);
     font-size: var(--font-size-md, 1rem);
     color: var(--color-text);
 }
 
-.form-page-container .text-danger { /* Переносим из инлайн-стилей */
+.form-page-container .text-danger {
     color: var(--color-danger, #dc3545);
-    font-weight: var(--font-weight-normal); /* Чтобы звездочка не была слишком жирной */
+    font-weight: var(--font-weight-normal);
 }
 
 .form-page-container .form-control {
     display: block;
     width: 100%;
-    padding: var(--input-padding-y, 0.75rem) var(--input-padding-x, 1rem); /* Увеличенные паддинги */
+    padding: var(--input-padding-y, 0.75rem) var(--input-padding-x, 1rem);
     font-size: var(--input-font-size, 1rem);
     font-weight: var(--input-font-weight, 400);
     line-height: var(--input-line-height, 1.5);
     color: var(--input-color, var(--color-text));
-    background-color: var(--input-bg, var(--color-background-alt)); /* Фон инпута, может быть светлее основного фона формы */
+    background-color: var(--input-bg, var(--color-background-alt));
     background-clip: padding-box;
     border: 1px solid var(--input-border-color, var(--color-border));
     appearance: none;
@@ -2518,10 +2712,9 @@ hr.section-divider { /* For <hr> between settings sections */
     opacity: 1;
 }
 
-/* Стили для невалидных полей */
+/* Styles for invalid fields */
 .form-page-container .form-control.is-invalid {
-    border-color: var(--color-danger, #dc3545) !important; /* !important чтобы перебить :focus */
-    /* Внутренняя тень для невалидного поля, можно сделать красной или комбинировать */
+    border-color: var(--color-danger, #dc3545) !important;
     box-shadow: var(--shadow-inner, inset 0 2px 4px 0 rgba(0,0,0,0.1)), 0 0 0 0.2rem rgba(var(--color-danger-rgb, 220, 53, 69), 0.15);
 }
 .form-page-container .form-control.is-invalid:focus {
@@ -2529,20 +2722,20 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 
-.form-page-container .error-text { /* Переносим из инлайн-стилей */
+.form-page-container .error-text {
     color: var(--color-danger, #dc3545);
-    font-size: var(--font-size-sm, 0.875rem); /* Немного увеличил для читаемости */
+    font-size: var(--font-size-sm, 0.875rem);
     margin-top: var(--spacing-1);
-    display: block; /* Убедимся, что это блок */
+    display: block;
 }
 
 .form-page-container textarea.form-control {
-    min-height: 120px; /* Стандартная высота для textarea */
+    min-height: 120px;
     resize: vertical;
 }
 
 .form-page-container .form-text.text-muted {
-    display: block; /* Чтобы занимал всю ширину под полем */
+    display: block;
     font-size: var(--font-size-sm, 0.875rem);
     color: var(--color-text-muted, #6c757d);
     margin-top: var(--spacing-1);
@@ -2550,42 +2743,40 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .form-page-container .form-actions {
-    margin-top: var(--spacing-5); /* Больший отступ перед кнопками */
+    margin-top: var(--spacing-5);
     padding-top: var(--spacing-4);
     border-top: 1px solid var(--color-border-light, #eee);
     display: flex;
-    justify-content: flex-end; /* Кнопки справа */
-    gap: var(--spacing-3); /* Пространство между кнопками */
+    justify-content: flex-end;
+    gap: var(--spacing-3);
 }
 
-/* Стили для input[type="date"] */
+/* Styles for input[type="date"] */
 .form-page-container input[type="date"].form-control {
-    /* Можно добавить кастомные стили для datepicker, если браузерные не устраивают, но это сложно */
-    /* Пока оставляем стандартные */
-    min-width: 200px; /* Чтобы дата помещалась */
-    max-width: 250px; /* Ограничим ширину */
+    min-width: 200px;
+    max-width: 250px;
 }
 
-/* Адаптивность */
+/* Responsiveness */
 @media (max-width: 768px) {
     .form-page-container {
         margin: var(--spacing-3) auto;
         padding: var(--spacing-4);
-        border-radius: var(--border-radius-lg); /* Можно уменьшить радиус на мобильных */
+        border-radius: var(--border-radius-lg);
     }
     .form-page-container .page-title,
     .form-page-container h1 {
-        font-size: var(--font-size-xl, 2rem); /* Уменьшаем заголовок */
+        font-size: var(--font-size-xl, 2rem);
         margin-bottom: var(--spacing-4);
     }
     .form-page-container .form-actions {
-        flex-direction: column; /* Кнопки одна под другой */
-        align-items: stretch; /* Растягиваем кнопки на всю ширину */
+        flex-direction: column;
+        align-items: stretch;
     }
     .form-page-container .form-actions .button {
-        width: 100%; /* Кнопки на всю ширину */
+        width: 100%;
     }
     .form-page-container .form-actions .button:not(:last-child) {
-        margin-bottom: var(--spacing-3); /* Отступ между кнопками в колонке */
+        margin-bottom: var(--spacing-3);
     }
 }

@@ -1,0 +1,2591 @@
+/* Global resets and CSS variables */
+:root {
+    --font-primary: 'Inter', sans-serif;
+    --font-secondary: 'Poppins', sans-serif;
+
+    /* Darkheim Theme Colors */
+    --color-primary: #7f5af0; /* Mystical Purple - Accent */
+    --color-primary-dark: #6949c6; /* Darker Purple */
+    --color-primary-light: #a78bfa; /* Lighter Purple */
+    --color-primary-contrast: #ffffff; /* White text on primary */
+
+    --color-accent: var(--color-primary);
+    --color-accent-dark: var(--color-primary-dark);
+    --color-accent-light: var(--color-primary-light);
+
+    --color-background: #101218; /* Deep dark background */
+    --color-surface: #1a1d24; /* Dark surface for cards, panels */
+    --color-surface-accent: #252930; /* Slightly lighter dark for accents */
+    --color-surface-overlay: rgba(26, 29, 36, 0.85); /* For modal backgrounds or overlays */
+
+    --color-text: #c5c8c6; /* Light grey for main text */
+    --color-text-muted: #888e99; /* Medium grey for secondary text */
+    --color-headings: #e0e0e0; /* Brighter off-white for headings */
+    --color-text-on-primary: var(--color-primary-contrast);
+    --color-text-on-accent: var(--color-primary-contrast);
+
+    --color-border: #3a3f4b; /* Dark, subtle border */
+    --color-border-light: #4a4f5b; /* Slightly lighter border */
+    --color-border-extralight: #2a2f3b; /* Very subtle border, almost like a separator */
+    --color-border-focus: var(--color-primary);
+
+    --color-success: #4CAF50; /* Green for success - vibrant on dark */
+    --color-danger: #f44336;  /* Red for errors - vibrant on dark */
+    --color-warning: #FFC107; /* Amber/Yellowish */
+    --color-warning-dark: #FFA000; 
+    --color-info: #2196F3;    /* Blue for information - vibrant on dark */
+
+    --color-success-rgb: 76, 175, 80;
+    --color-danger-rgb: 244, 67, 54;
+    --color-warning-rgb: 255, 193, 7;
+    --color-info-rgb: 33, 150, 243;
+    --color-primary-rgb: 127, 90, 240;
+    --color-background-rgb: 16, 18, 24;
+    --color-surface-rgb: 26, 29, 36;
+    --color-surface-accent-rgb: 37, 41, 48;
+
+    --color-secondary: #4b5563; /* Neutral dark grey for secondary elements */
+    --color-secondary-dark: #374151;
+    --color-secondary-light: #6b7280;
+
+    --border-radius-sm: 4px; /* Slightly sharper for graphic style */
+    --border-radius: 6px;
+    --border-radius-lg: 8px;
+    --border-radius-xl: 12px;
+    --border-radius-pill: 9999px;
+
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.15), 0 1px 3px 0 rgba(var(--color-primary-rgb), 0.05);
+    --shadow-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(var(--color-primary-rgb), 0.07), 0 1px 10px 0 rgba(var(--color-primary-rgb), 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 6px 10px 0 rgba(var(--color-primary-rgb), 0.08), 0 2px 16px 0 rgba(var(--color-primary-rgb), 0.07);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 8px 20px 2px rgba(var(--color-primary-rgb), 0.09), 0 4px 25px 2px rgba(var(--color-primary-rgb), 0.08);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 15px 30px 5px rgba(var(--color-primary-rgb), 0.1), 0 10px 40px 5px rgba(var(--color-primary-rgb), 0.09);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0,0,0,0.1);
+    --shadow-outline: 0 0 0 3px rgba(var(--color-primary-rgb), 0.4);
+
+    --spacing-1: 0.25rem; /* 4px */
+    --spacing-2: 0.5rem;  /* 8px */
+    --spacing-3: 1rem;    /* 16px */
+    --spacing-4: 1.5rem;  /* 24px */
+    --spacing-5: 2rem;    /* 32px */
+    --spacing-6: 3rem;    /* 48px */
+
+    --hover-opacity: 0.85;
+    --transition-duration: 0.2s; /* Slightly faster for a snappier feel */
+    --transition-duration-long: 0.4s;
+    --transition-timing-function: ease-in-out;
+}
+
+/* Base styles */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-width: 0; /* Reset borders for a more graphic control */
+    border-style: solid;
+    border-color: var(--color-border); /* Default border color */
+}
+
+html {
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    background-color: var(--color-background); /* Apply to html for full page bg */
+    color: var(--color-text); /* Default text color */
+}
+
+body {
+    font-family: var(--font-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: background-color var(--transition-duration) var(--transition-timing-function), color var(--transition-duration) var(--transition-timing-function);
+}
+
+body.mobile-nav-open {
+    overflow: hidden;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-headings);
+    font-family: var(--font-secondary);
+    font-weight: 600; /* Slightly bolder for Darkheim */
+    line-height: 1.3; /* Tighter line height for headings */
+    margin-top: var(--spacing-4);
+    margin-bottom: var(--spacing-2);
+    letter-spacing: -0.025em; /* Subtle letter spacing for headings */
+}
+
+h1 { font-size: 2.5rem; }   /* 40px */
+h2 { font-size: 2rem; }     /* 32px */
+h3 { font-size: 1.75rem; }  /* 28px */
+h4 { font-size: 1.5rem; }   /* 24px */
+h5 { font-size: 1.25rem; }  /* 20px */
+h6 { font-size: 1rem; }     /* 16px */
+
+p {
+    margin-bottom: var(--spacing-3);
+    line-height: 1.7;
+}
+
+a {
+    color: var(--color-primary-light); /* Brighter links for dark theme */
+    text-decoration: none;
+    transition: color var(--transition-duration) var(--transition-timing-function), opacity var(--transition-duration) var(--transition-timing-function);
+}
+
+a:hover {
+    color: var(--color-primary);
+    opacity: var(--hover-opacity);
+    text-decoration: underline; /* Add underline on hover for clarity */
+}
+
+strong, b {
+    font-weight: 700;
+    color: var(--color-headings); /* Ensure strong text stands out */
+}
+
+em, i {
+    font-style: italic;
+    color: var(--color-text);
+}
+
+ul, ol {
+    margin-bottom: var(--spacing-3);
+    padding-left: var(--spacing-4);
+}
+
+li {
+    margin-bottom: var(--spacing-1);
+}
+
+hr {
+    border: 0;
+    border-top-width: 1px; /* Use border-width */
+    border-color: var(--color-border-extralight); /* Subtle separator */
+    margin: var(--spacing-5) 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--border-radius-sm); /* Subtle rounding for images */
+}
+
+/* Selection Styling */
+::selection {
+    background-color: var(--color-primary);
+    color: var(--color-text-on-primary);
+}
+::-moz-selection { /* Firefox */
+    background-color: var(--color-primary);
+    color: var(--color-text-on-primary);
+}
+
+/* Scrollbar Styling (Optional, but fits graphic theme) */
+/* For Webkit browsers */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-surface-accent);
+    border-radius: var(--border-radius-pill);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-secondary);
+    border-radius: var(--border-radius-pill);
+    border: 2px solid var(--color-surface-accent); /* Creates padding around thumb */
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-secondary-light);
+}
+/* For Firefox (limited styling) */
+/* body { scrollbar-color: var(--color-secondary) var(--color-surface-accent); } */
+/* Uncomment above if you want basic Firefox scrollbar styling */
+
+/* Layout: Site Header */
+.site-header {
+    background-color: var(--color-surface); /* Dark surface for header */
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border); /* Subtle border */
+    box-shadow: var(--shadow-sm);
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+.header-container {
+    max-width: 1200px; /* Or your preferred max-width */
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 1.75rem; /* Larger logo text */
+    font-weight: 700;
+    color: var(--color-primary-light); /* Use a lighter primary for logo */
+    text-decoration: none;
+    font-family: var(--font-secondary);
+    letter-spacing: -0.05em; /* Graphic touch */
+}
+
+.logo a:hover {
+    color: var(--color-primary);
+    opacity: 1; /* No opacity change for logo */
+}
+
+/* Layout: Main Navigation (in Header) */
+.main-navigation ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--spacing-3); /* Spacing between nav items */
+}
+
+.main-navigation li {
+    margin: 0;
+}
+
+.main-navigation a {
+    color: var(--color-text);
+    text-decoration: none;
+    padding: var(--spacing-2) var(--spacing-1);
+    font-weight: 500;
+    border-radius: var(--border-radius-sm);
+    transition: color var(--transition-duration) var(--transition-timing-function),
+                background-color var(--transition-duration) var(--transition-timing-function);
+}
+
+.main-navigation a:hover,
+.main-navigation a.active { /* Style for active link */
+    color: var(--color-primary-contrast);
+    background-color: var(--color-primary); /* Accent color for hover/active */
+    text-decoration: none;
+    opacity: 1;
+}
+
+/* User-specific nav buttons from config */
+.main-navigation a.nav-button {
+    padding: var(--spacing-1) var(--spacing-3);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary-light);
+}
+.main-navigation a.nav-button:hover,
+.main-navigation a.nav-button.active {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-color: var(--color-primary);
+}
+
+
+/* Mobile Navigation Toggle */
+.mobile-nav-toggle {
+    display: none; /* Hidden by default, shown in media query */
+    background: none;
+    border: none;
+    color: var(--color-text);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+/* Layout: Site Wrapper (for Sidebar and Main Content) */
+.site-wrapper {
+    display: flex;
+    flex-grow: 1; /* Allows footer to stick to bottom */
+    max-width: 1200px; /* Consistent max-width */
+    margin: var(--spacing-4) auto; /* Centering and top/bottom margin */
+    gap: var(--spacing-4); /* Space between sidebar and main content */
+    padding: 0 var(--spacing-4); /* Padding for smaller screens */
+}
+
+/* Layout: Sidebar */
+.sidebar {
+    width: 300px; /* Fixed width for sidebar */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    /* background-color: var(--color-surface); */ /* Widgets will have their own bg */
+    /* padding: var(--spacing-4); */
+    /* border-radius: var(--border-radius-lg); */
+    /* box-shadow: var(--shadow-md); */
+}
+
+.sidebar > div { /* Spacing between widgets in sidebar */
+    margin-bottom: var(--spacing-4);
+}
+
+/* Ensure Darkheim widgets in sidebar use new variables */
+.sidebar .darkheim-widget {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border); /* Use global border color */
+    box-shadow: var(--shadow-md); /* Use global shadow */
+    /* Other styles for .darkheim-widget from previous step should adapt or be reviewed */
+}
+
+.sidebar .darkheim-widget .user-widget__avatar {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border: 2px solid var(--color-primary-light);
+}
+.sidebar .darkheim-widget .user-widget__username {
+    color: var(--color-headings);
+}
+.sidebar .darkheim-widget .user-widget__nav a {
+    color: var(--color-primary-light);
+}
+.sidebar .darkheim-widget .user-widget__nav a:hover {
+    color: var(--color-primary);
+}
+.sidebar .darkheim-widget .user-widget__nav a.logout-link {
+    color: var(--color-danger);
+}
+.sidebar .darkheim-widget .user-widget__nav a.logout-link:hover {
+    color: var(--color-danger);
+    opacity: var(--hover-opacity);
+}
+
+.sidebar .darkheim-widget .form-group label {
+    color: var(--color-text-muted);
+}
+.sidebar .darkheim-widget .form-input {
+    background-color: var(--color-surface-accent);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-light);
+}
+.sidebar .darkheim-widget .form-input:focus {
+    border-color: var(--color-border-focus);
+    box-shadow: var(--shadow-outline);
+}
+.sidebar .darkheim-widget .form-button {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+}
+.sidebar .darkheim-widget .form-button:hover {
+    background-color: var(--color-primary-dark);
+}
+.sidebar .darkheim-widget .register-prompt {
+    color: var(--color-text-muted);
+}
+.sidebar .darkheim-widget .register-link {
+    color: var(--color-primary-light);
+}
+.sidebar .darkheim-widget .register-link:hover {
+    color: var(--color-primary);
+}
+
+/* Darkheim Widget Style (applied to .user-widget and .login-widget) */
+.darkheim-widget {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    padding: var(--spacing-4); /* Increased padding for a more spacious feel */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* User Widget Specifics */
+.user-widget.darkheim-widget .user-widget__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-3);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-border-extralight);
+}
+
+.user-widget.darkheim-widget .user-widget__avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-right: var(--spacing-3);
+    border: 2px solid var(--color-primary-light);
+}
+
+.user-widget.darkheim-widget .user-widget__username {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--color-headings);
+}
+
+.user-widget.darkheim-widget .user-widget__nav ul, /* Ensure ul is targeted if present */
+.user-widget.darkheim-widget .user-widget__nav { /* Or nav directly if ul is removed */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-widget.darkheim-widget .user-widget__nav li {
+    margin-bottom: var(--spacing-1);
+}
+
+.user-widget.darkheim-widget .user-widget__nav a {
+    color: var(--color-primary-light);
+    text-decoration: none;
+    padding: var(--spacing-2) 0; /* More vertical padding */
+    display: block;
+    transition: color var(--transition-duration) ease, padding-left var(--transition-duration) ease;
+    font-size: 0.95em;
+    border-radius: var(--border-radius-sm);
+}
+
+.user-widget.darkheim-widget .user-widget__nav a:hover {
+    color: var(--color-primary);
+    padding-left: var(--spacing-1);
+    background-color: rgba(var(--color-primary-rgb), 0.1); /* Subtle hover background */
+}
+
+.user-widget.darkheim-widget .user-widget__nav a.logout-link {
+    color: var(--color-danger);
+}
+
+.user-widget.darkheim-widget .user-widget__nav a.logout-link:hover {
+    color: var(--color-danger);
+    opacity: var(--hover-opacity);
+    background-color: rgba(var(--color-danger-rgb), 0.1);
+}
+
+/* Login Widget Specifics */
+.login-widget.darkheim-widget .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2); /* Reduced gap for a tighter form */
+}
+
+/* .form-group, .form-control, .button, .button-primary, .button-block
+   are already defined globally. The login widget will inherit these. */
+
+.login-widget.darkheim-widget .register-prompt {
+    /* text-align: center; already in inline style, can be moved to CSS */
+    /* margin-top: var(--spacing-3); already in inline style */
+    font-size: 0.9em;
+    color: var(--color-text-muted);
+}
+
+.login-widget.darkheim-widget .register-link {
+    color: var(--color-primary-light);
+    text-decoration: none;
+    font-weight: 500; /* Slightly less bold than default strong */
+}
+
+.login-widget.darkheim-widget .register-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Quick Links Widget (if in sidebar) */
+.quick-links-widget__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.quick-links-widget__list li {
+    margin-bottom: var(--spacing-1);
+}
+.quick-links-widget__list a {
+    color: var(--color-primary-light);
+    text-decoration: none;
+    display: block;
+    padding: var(--spacing-1) 0;
+    transition: color var(--transition-duration) ease, padding-left var(--transition-duration) ease;
+}
+.quick-links-widget__list a:hover {
+    color: var(--color-primary);
+    padding-left: var(--spacing-1);
+}
+
+
+/* Layout: Main Content */
+.main-content {
+    flex-grow: 1;
+    background-color: var(--color-surface);
+    padding: var(--spacing-4); /* Internal padding for the panel */
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    min-width: 860px;
+}
+
+/* Container for authentication pages */
+.auth-page-container {
+    width: 100%;
+    max-width: 1100px; /* Overall maximum page width */
+    margin: var(--spacing-4) auto; /* Centering and vertical margins */
+    padding: var(--spacing-4);
+    box-sizing: border-box; /* Added just in case */
+}
+
+/* New layout with two columns */
+.auth-layout-split {
+    display: flex !important; /* Temporarily add !important for testing */
+    flex-wrap: nowrap !important; /* Temporarily remove wrapping for testing */
+    gap: var(--spacing-5); /* Space between columns */
+    align-items: flex-start; /* Align to the top if columns have different heights */
+}
+
+.auth-layout-column {
+    flex-grow: 1;
+}
+
+.auth-layout-column-form {
+    flex-basis: 450px; /* Fixed or percentage width for the form */
+    max-width: 450px; /* Limit form width */
+}
+
+.auth-layout-column-info {
+    flex-basis: 40%; /* Remaining space or specific value */
+    padding-top: var(--spacing-3); /* Small top padding to align with the form */
+}
+
+/* Card/panel for the authentication form */
+.auth-form-card {
+    background-color: var(--color-surface);
+    padding: var(--spacing-5);
+    border-radius: var(--border-radius-xl);
+    width: 100%; /* Occupies full width of its column */
+    max-width: 450px;
+    margin-left: auto; /* Center the card horizontally */
+    margin-right: auto; /* Center the card horizontally */
+}
+
+/* Page title in the info column */
+.auth-layout-column-info .page-title,
+.auth-layout-column-info .auth-page-main-title { /* Adding specificity */
+    text-align: left; /* Align to the left for the info column */
+    margin-top: 0; 
+    margin-bottom: var(--spacing-4); /* Space below the title */
+}
+
+/* Warning Message in the info column */
+.auth-layout-column-info .auth-warning-message {
+    max-width: 100%; /* Occupies full width of the info column */
+    margin-left: 0; /* Remove auto margin as the column is already positioned */
+    margin-right: 0;
+}
+
+/* Adaptation for mobile devices */
+@media (max-width: 992px) { /* Or another breakpoint, e.g., 768px */
+    .auth-layout-split {
+        flex-direction: column; /* Columns one under another */
+        align-items: center; /* Center content if columns become narrow */
+    }
+    .auth-layout-column-form,
+    .auth-layout-column-info {
+        flex-basis: auto; /* Reset basis */
+        width: 100%; /* Columns take up full width */
+        max-width: 600px; /* Limit maximum width for readability */
+    }
+    .auth-layout-column-info {
+        order: -1; /* Info column (title and warning) will be on top */
+        text-align: center; /* Center text in info column on mobile */
+        padding-top: 0;
+        margin-bottom: var(--spacing-4);
+    }
+    .auth-layout-column-info .page-title,
+    .auth-layout-column-info .auth-page-main-title {
+        text-align: center;
+    }
+    .auth-layout-column-info .auth-warning-message {
+        margin-left: auto;
+        margin-right: auto; /* Center the warning block */
+    }
+    .auth-form-card {
+        margin: 0 auto; /* Center the form card if narrower than the column */
+    }
+}
+
+/* Container for authentication pages, ensures card centering */
+.auth-page-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--spacing-4);
+}
+
+/* Card/panel for the authentication form */
+.auth-form-card {
+    background-color: var(--color-surface);
+    padding: var(--spacing-5);
+    border-radius: var(--border-radius-xl);
+    width: 100%;
+    max-width: 450px;
+    margin-left: auto; /* Center the card horizontally */
+    margin-right: auto; /* Center the card horizontally */
+}
+
+/* Title inside the form card */
+.auth-form-title {
+    font-size: 1.8rem; /* Title size */
+    color: var(--color-headings);
+    text-align: center;
+    margin-top: 0; /* Remove default h2 margin */
+    margin-bottom: var(--spacing-4); /* Space below the title */
+}
+
+/* Messages inside the form card */
+.auth-form-card .messages {
+    margin-left: calc(-1 * var(--spacing-5)); /* Align to card edges if .messages has its own margins */
+    margin-right: calc(-1 * var(--spacing-5));
+    margin-bottom: var(--spacing-3);
+    border-radius: 0; /* Remove radius for messages inside the card */
+    border-left: none;
+    border-right: none;
+    box-shadow: none; /* Remove shadow for messages as the card has shadow */
+}
+.auth-form-card .messages.errors,
+.auth-form-card .messages.success {
+    border-top-left-radius: var(--border-radius-xl); /* Preserve card radius at the top if the message is first */
+    border-top-right-radius: var(--border-radius-xl);
+}
+
+/* Fields inside the form card */
+.auth-form-card .form-group {
+    margin-bottom: var(--spacing-3); /* Space between field groups */
+}
+.auth-form-card .form-label {
+    font-size: 0.9rem;
+}
+
+/* Submit button */
+.auth-form-card .form-actions {
+    margin-top: var(--spacing-4);
+}
+.auth-form-card .button-block {
+    font-size: 1rem; /* Slightly larger button */
+}
+
+/* Footer of the form with a link to login */
+.auth-form-footer {
+    margin-top: var(--spacing-4);
+    text-align: center;
+    font-size: 0.9rem;
+}
+.auth-form-footer p {
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+}
+.auth-form-footer a {
+    color: var(--color-primary-light);
+    text-decoration: none;
+    font-weight: 500;
+}
+.auth-form-footer a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+
+
+/* Стили для формы на страницах аутентификации */
+.auth-form-panel {
+    max-width: 720px; /* Новая, большая максимальная ширина. Подберите значение по вкусу. */
+    margin: 0 auto;   /* Центрирование формы, если она уже чем .main-content */
+    /* Если вы хотите, чтобы сама форма имела фон/рамку, отличные от .main-content, добавьте их сюда.
+       Например:
+       background-color: var(--color-surface-accent); // Чуть другой фон для самой формы
+       padding: var(--spacing-4); // Внутренние отступы для формы
+       border-radius: var(--border-radius-md);
+       border: 1px solid var(--color-border-light);
+       box-shadow: var(--shadow-sm); // Меньшая тень, если .main-content уже имеет тень
+    */
+}
+
+.auth-page-main-title.page-title, /* Этот селектор должен применяться к <h1 class="page-title"> */
+.auth-page-container > .page-title { /* Или более общий селектор, если h1 имеет только класс page-title */
+    text-align: center;
+    margin-top: 0; 
+    margin-bottom: var(--spacing-3); /* Уменьшим немного отступ, если предупреждение близко */
+    width: 100%;
+    display: block;
+}
+
+/* Warning Message on Auth Pages */
+.auth-warning-message {
+    max-width: 600px; /* Ограничим ширину для лучшей читаемости */
+    margin: 0 auto var(--spacing-4) auto; /* Центрируем и добавляем отступ снизу */
+    padding: var(--spacing-3);
+    background-color: rgba(var(--color-warning-rgb, 255, 193, 7), 0.1); /* Светлый фон предупреждения */
+    border: 1px solid var(--color-warning, #FFC107); /* Рамка в цвет предупреждения */
+    border-left-width: 5px; /* Акцентная левая рамка */
+    border-radius: var(--border-radius-md);
+    color: var(--color-text); /* Основной цвет текста */
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+/* Layout: Site Footer */
+.site-footer {
+    background-color: var(--color-surface-accent); /* Slightly different dark for footer */
+    color: var(--color-text-muted);
+    padding: var(--spacing-4) var(--spacing-4);
+    text-align: center;
+    border-top: 1px solid var(--color-border);
+    margin-top: auto; /* Pushes footer to bottom if content is short */
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.footer-nav {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+.footer-nav a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.footer-nav a:hover {
+    color: var(--color-primary-light);
+    text-decoration: underline;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 992px) { /* Tablet and below */
+    .site-wrapper {
+        flex-direction: column;
+        margin-top: var(--spacing-3);
+        gap: var(--spacing-3);
+    }
+    .sidebar {
+        width: 100%; /* Full width on smaller screens */
+        margin-bottom: var(--spacing-3);
+    }
+}
+
+@media (max-width: 768px) { /* Mobile */
+    .header-container {
+        position: relative; /* For mobile nav positioning */
+    }
+    .main-navigation {
+        display: none; /* Hide desktop nav */
+        position: absolute;
+        top: 100%; /* Position below header */
+        left: 0;
+        right: 0;
+        background-color: var(--color-surface);
+        flex-direction: column;
+        padding: var(--spacing-3);
+        box-shadow: var(--shadow-md);
+        border-top: 1px solid var(--color-border);
+    }
+    .main-navigation.active { /* Class toggled by JS */
+        display: flex;
+    }
+    .main-navigation ul {
+        flex-direction: column;
+        gap: var(--spacing-1);
+    }
+    .main-navigation a {
+        display: block; /* Make links full width */
+        padding: var(--spacing-2);
+    }
+    .mobile-nav-toggle {
+        display: block; /* Show hamburger icon */
+    }
+
+    .site-wrapper {
+        margin-top: var(--spacing-2);
+        padding: 0 var(--spacing-2);
+        gap: var(--spacing-2);
+    }
+    .main-content, .sidebar {
+        padding: var(--spacing-3);
+    }
+    .footer-content {
+        flex-direction: column;
+    }
+    .footer-nav {
+        flex-direction: column;
+        gap: var(--spacing-1);
+    }
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.button,
+button, /* Style native button elements as well */
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+    display: inline-block;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent; /* Base border */
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--border-radius-sm);
+    transition: color var(--transition-duration) var(--transition-timing-function),
+                background-color var(--transition-duration) var(--transition-timing-function),
+                border-color var(--transition-duration) var(--transition-timing-function),
+                box-shadow var(--transition-duration) var(--transition-timing-function),
+                opacity var(--transition-duration) var(--transition-timing-function);
+    line-height: 1.5; /* Ensure consistent height */
+}
+
+/* Primary Button */
+.button-primary,
+button.button-primary, /* For <button class="button button-primary"> */
+input[type="submit"] { /* Default submit buttons are primary */
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-color: var(--color-primary);
+}
+.button-primary:hover,
+button.button-primary:hover,
+input[type="submit"]:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: var(--color-primary-contrast);
+    opacity: 1;
+}
+.button-primary:focus,
+button.button-primary:focus,
+input[type="submit"]:focus {
+    box-shadow: var(--shadow-outline);
+    outline: none;
+}
+
+/* Secondary Button */
+.button-secondary,
+button.button-secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-primary-contrast); /* Assuming secondary is dark enough for light text */
+    border-color: var(--color-secondary);
+}
+.button-secondary:hover,
+button.button-secondary:hover {
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    color: var(--color-primary-contrast);
+    opacity: 1;
+}
+.button-secondary:focus,
+button.button-secondary:focus {
+    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.4); /* Custom outline for secondary */
+    outline: none;
+}
+
+/* Outline Button */
+.button-outline {
+    background-color: transparent;
+    color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+}
+.button-outline:hover {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-color: var(--color-primary);
+    opacity: 1;
+}
+
+/* Danger Button */
+.button-danger {
+    background-color: var(--color-danger);
+    color: var(--color-primary-contrast);
+    border-color: var(--color-danger);
+}
+.button-danger:hover {
+    background-color: var(--color-danger); /* Darken or adjust as needed */
+    opacity: var(--hover-opacity);
+    border-color: var(--color-danger);
+    color: var(--color-primary-contrast);
+}
+
+/* Button Sizes */
+.button-small {
+    font-size: 0.8rem;
+    padding: var(--spacing-1) var(--spacing-2);
+}
+.button-large {
+    font-size: 1.1rem;
+    padding: var(--spacing-3) var(--spacing-4);
+}
+
+/* Block Button */
+.button-block {
+    display: block;
+    width: 100%;
+}
+
+/* Disabled State */
+.button:disabled,
+button:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+input[type="button"]:disabled {
+    background-color: var(--color-secondary-dark);
+    border-color: var(--color-secondary-dark);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.form-group {
+    margin-bottom: var(--spacing-3);
+}
+
+.form-label,
+label { /* Style native label elements */
+    display: block;
+    font-weight: 500;
+    color: var(--color-text); /* Use standard text color for labels */
+    margin-bottom: var(--spacing-1);
+    font-size: 0.9rem;
+}
+
+.form-control,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-2) var(--spacing-2);
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: var(--color-surface-accent);
+    background-clip: padding-box;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    transition: border-color var(--transition-duration) var(--transition-timing-function),
+                box-shadow var(--transition-duration) var(--transition-timing-function);
+}
+
+.form-control:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus,
+textarea:focus,
+select:focus {
+    color: var(--color-text);
+    background-color: var(--color-surface-accent);
+    border-color: var(--color-border-focus);
+    outline: 0;
+    box-shadow: var(--shadow-outline);
+}
+
+textarea.form-control {
+    min-height: calc(1.5em + (var(--spacing-2) * 2) + 2px); /* Default to roughly 1 row */
+    resize: vertical;
+}
+textarea[rows] { /* If rows attribute is present, let it define height */
+    min-height: unset;
+}
+
+
+select.form-control {
+    /* Add custom arrow for select if desired, or leave as browser default */
+    appearance: none; /* Remove default arrow for custom styling */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c5c8c6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-2) center;
+    background-size: 16px 12px;
+    padding-right: calc(var(--spacing-2) * 2.5); /* Make space for arrow */
+}
+select.form-control:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237f5af0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); /* Change arrow color on focus */
+}
+
+
+/* Checkboxes and Radios */
+.form-checkbox-group,
+.form-radio-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+input[type="checkbox"],
+input[type="radio"] {
+    width: 1.15em;
+    height: 1.15em;
+    margin-top: 0.1em; /* Align better with label text */
+    vertical-align: top;
+    background-color: var(--color-surface-accent);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--border-radius-sm);
+    appearance: none; /* Remove default appearance */
+    cursor: pointer;
+    position: relative;
+    transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+}
+input[type="radio"] {
+    border-radius: 50%; /* Radios are round */
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+input[type="checkbox"]:checked::before {
+    content: '';
+    display: block;
+    width: 0.65em;
+    height: 0.35em;
+    border: solid var(--color-primary-contrast);
+    border-width: 0 0.15em 0.15em 0;
+    transform: rotate(45deg) translate(-50%, -50%);
+    position: absolute;
+    left: 50%;
+    top: 45%; /* Slight adjustment for visual centering */
+}
+input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 0.5em;
+    height: 0.5em;
+    background-color: var(--color-primary-contrast);
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+    outline: none;
+    box-shadow: var(--shadow-outline);
+}
+
+.form-checkbox-group label,
+.form-radio-group label {
+    margin-bottom: 0; /* Reset margin for labels next to checkboxes/radios */
+    font-weight: 400;
+}
+
+/* Input Groups (for icons with inputs) */
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+.input-group .form-control {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+}
+.input-group .form-control:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.input-group .form-control:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+.input-group-icon,
+.input-group-text {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-2) var(--spacing-2);
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--color-surface); /* Slightly different from input bg */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+}
+.input-group-icon:first-child,
+.input-group-text:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0; /* Avoid double border */
+}
+.input-group-icon:last-child,
+.input-group-text:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0; /* Avoid double border */
+}
+.input-group .form-control:focus + .input-group-icon, /* Style icon when input is focused */
+.input-group .form-control:focus + .input-group-text {
+    border-color: var(--color-border-focus);
+}
+
+
+/* Form Validation States */
+.form-control.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+    border-color: var(--color-danger);
+    padding-right: calc(1.5em + var(--spacing-2) * 1.5); /* Make space for icon */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23f44336'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23f44336' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-2) center;
+    background-size: 1.5em 1.5em; /* Adjust icon size */
+}
+.form-control.is-invalid:focus,
+textarea.is-invalid:focus,
+select.is-invalid:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 0.25rem rgba(var(--color-danger-rgb), 0.25);
+}
+.error-text, .invalid-feedback { /* For text below invalid fields */
+    display: block;
+    width: 100%;
+    margin-top: var(--spacing-1);
+    font-size: 0.8rem;
+    color: var(--color-danger);
+}
+
+.form-control.is-valid,
+textarea.is-valid,
+select.is-valid {
+    border-color: var(--color-success);
+    /* Optional: Add success icon */
+}
+.form-control.is-valid:focus,
+textarea.is-valid:focus,
+select.is-valid:focus {
+    border-color: var(--color-success);
+    box-shadow: 0 0 0 0.25rem rgba(var(--color-success-rgb), 0.25);
+}
+.valid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: var(--spacing-1);
+    font-size: 0.8rem;
+    color: var(--color-success);
+}
+
+/* Form Actions (for submit/cancel buttons) */
+.form-actions {
+    margin-top: var(--spacing-4);
+    display: flex;
+    gap: var(--spacing-2);
+    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    justify-content: flex-start; /* Or flex-end, center */
+}
+
+/* Styled Form (a wrapper class for forms if needed for specific layout) */
+.styled-form {
+    background-color: var(--color-surface); /* Can be same as .main-content or slightly different */
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+.auth-form-container .styled-form { /* Example for login/register pages */
+    max-width: 450px;
+    margin: var(--spacing-4) auto;
+}
+
+
+/* ==========================================================================
+   Messages / Alerts
+   ========================================================================== */
+.messages, /* General container for multiple messages */
+.message {  /* Single message */
+    padding: var(--spacing-3);
+    margin-bottom: var(--spacing-3);
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-lg); /* More pronounced radius for messages */
+    color: var(--color-text); /* Default text color */
+    background-color: var(--color-surface-accent); /* Default background */
+    box-shadow: var(--shadow-sm);
+    display: flex; /* For icon alignment if added */
+    align-items: flex-start; /* Align icon to top */
+    gap: var(--spacing-2);
+}
+.message p:last-child {
+    margin-bottom: 0; /* Remove bottom margin from last paragraph in message */
+}
+
+/* Message types */
+.message--success, .messages.success {
+    background-color: rgba(var(--color-success-rgb), 0.15); /* Lighter shade of success */
+    border-color: var(--color-success);
+    color: var(--color-success); /* Darker text for contrast */
+}
+.message--error, .messages.error, .messages.errors { /* .errors for backward compatibility */
+    background-color: rgba(var(--color-danger-rgb), 0.15);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+.message--warning, .messages.warning {
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    border-color: var(--color-warning);
+    color: #a15c00; /* Darker orange for text */
+}
+.message--info, .messages.info {
+    background-color: rgba(var(--color-info-rgb), 0.15);
+    border-color: var(--color-info);
+    color: var(--color-info);
+}
+
+/* Optional: Add icons to messages */
+/* .message::before {
+    font-family: "Your Icon Font"; // Replace with your icon font if you use one
+    font-size: 1.5em;
+    line-height: 1;
+    margin-right: var(--spacing-2);
+}
+.message--success::before { content: "\f058"; color: var(--color-success); } // Example FontAwesome check-circle
+.message--error::before { content: "\f071"; color: var(--color-danger); } // Example FontAwesome exclamation-triangle
+.message--warning::before { content: "\f06a"; color: var(--color-warning); } // Example FontAwesome exclamation-circle
+.message--info::before { content: "\f05a"; color: var(--color-info); } // Example FontAwesome info-circle
+*/
+
+/* Full width message variant */
+.full-width-message {
+    border-radius: 0; /* No radius if it spans full width of its container */
+    margin-left: calc(-1 * var(--spacing-4)); /* Assuming parent has var(--spacing-4) padding */
+    margin-right: calc(-1 * var(--spacing-4));
+    border-left: none;
+    border-right: none;
+}
+.main-content > .full-width-message:first-child { /* If it's the very first child */
+    margin-top: calc(-1 * var(--spacing-4));
+    border-top: none;
+    border-top-left-radius: var(--border-radius-lg); /* Match parent's top radius */
+    border-top-right-radius: var(--border-radius-lg);
+}
+.main-content > .full-width-message:last-child {
+    margin-bottom: calc(-1 * var(--spacing-4));
+    border-bottom: none;
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+}
+
+
+/* ==========================================================================
+   Content Styling (Articles, Cards, etc.)
+   ========================================================================== */
+
+/* Page Title (if not already covered by h1-h6) */
+.page-title {
+    font-size: 2.2rem; /* Slightly smaller than h1 for specific page titles */
+    color: var(--color-headings);
+    margin-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-extralight);
+    padding-bottom: var(--spacing-2);
+}
+
+/* Section Title (for subsections within a page) */
+.section-title {
+    font-size: 1.8rem; /* Like an H3 */
+    color: var(--color-headings);
+    margin-top: var(--spacing-5);
+    margin-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-border-extralight);
+    padding-bottom: var(--spacing-2);
+}
+.section-title:first-child {
+    margin-top: 0; /* No top margin if it's the first element */
+}
+
+/* Article Styling */
+
+.single-article-title { /* Typically an H1 */
+    margin-bottom: var(--spacing-2);
+}
+.article-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+}
+.article-meta p {
+    margin-bottom: 0;
+}
+
+.article-content {
+    line-height: 1.8; /* More readable for long text */
+}
+.article-content p {
+    margin-bottom: var(--spacing-3);
+}
+.article-content img {
+    margin: var(--spacing-3) 0;
+    border-radius: var(--border-radius-lg); /* Larger radius for content images */
+    box-shadow: var(--shadow-md);
+}
+.article-content blockquote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--spacing-3);
+    margin: var(--spacing-4) 0;
+    font-style: italic;
+    color: var(--color-text-muted);
+}
+.article-content ul, .article-content ol {
+    margin-left: var(--spacing-3); /* Indent lists within articles */
+}
+
+/* Post Cards (for grids of articles, e.g., on homepage or news list) */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive grid */
+    gap: var(--spacing-4);
+}
+.post-card {
+    background-color: var(--color-surface-accent); /* Slightly different from main surface */
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden; /* To contain image radius */
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-duration) ease, box-shadow var(--transition-duration) ease;
+}
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+.post-card-image-link {
+    display: block;
+}
+.post-card-image {
+    width: 100%;
+    height: 200px; /* Fixed height for consistency */
+    object-fit: cover; /* Crop image to fit */
+    border-top-left-radius: var(--border-radius-lg);
+    border-top-right-radius: var(--border-radius-lg);
+    border-bottom: 1px solid var(--color-border); /* Separator */
+}
+.post-card-content {
+    padding: var(--spacing-3);
+    flex-grow: 1; /* Allow content to fill space if card heights vary */
+    display: flex;
+    flex-direction: column;
+}
+.post-card-title {
+    font-size: 1.25rem; /* H5 size */
+    margin-top: 0;
+    margin-bottom: var(--spacing-2);
+}
+.post-card-title a {
+    color: var(--color-headings);
+}
+.post-card-title a:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+.post-card-excerpt {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-3);
+    flex-grow: 1; /* Push button to bottom */
+}
+.post-card .button {
+    margin-top: auto; /* Push button to bottom of card content */
+    align-self: flex-start; /* Align button to the left */
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: var(--spacing-5);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-border-extralight);
+}
+.comments-section-title { /* Typically an H2 or H3 */
+    margin-top: 0;
+    margin-bottom: var(--spacing-4);
+}
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+.comment-item {
+    background-color: var(--color-surface-accent);
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-border);
+}
+.comment-author {
+    font-weight: 600;
+    color: var(--color-headings);
+    margin-bottom: var(--spacing-1);
+    font-size: 0.95rem;
+}
+.comment-author .comment-date {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+.comment-content {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.comment-content p:last-child {
+    margin-bottom: 0;
+}
+.comment-form {
+    margin-top: var(--spacing-4);
+}
+.no-comments-message,
+.login-prompt { /* For "no comments" or "login to comment" */
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: var(--spacing-3);
+    background-color: var(--color-surface-accent);
+    border-radius: var(--border-radius-md);
+    text-align: center;
+}
+
+/* Dashboard Specifics (Example) */
+.dashboard-welcome-message {
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-1);
+}
+.user-current-status {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+.dashboard-intro {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-4);
+}
+.dashboard-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-5);
+}
+.overview-card {
+    background-color: var(--color-surface-accent);
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xs);
+}
+.overview-card-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: var(--spacing-2);
+    color: var(--color-primary);
+}
+.overview-card-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-headings);
+    display: block;
+}
+.overview-card-label {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-top: var(--spacing-1);
+}
+
+.dashboard-section-title { /* H3 size */
+    font-size: 1.5rem;
+    margin-top: var(--spacing-5);
+    margin-bottom: var(--spacing-3);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 1px solid var(--color-border-extralight);
+}
+.dashboard-profile-snapshot,
+.dashboard-actions-container { /* Renamed from .dashboard-actions for clarity */
+    background-color: var(--color-surface-accent);
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-4);
+    border: 1px solid var(--color-border);
+}
+.profile-details-list,
+.dashboard-actions { /* .dashboard-actions is ul */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.profile-details-list li,
+.dashboard-actions li {
+    padding: var(--spacing-2) 0;
+    border-bottom: 1px solid var(--color-border-extralight);
+    font-size: 0.95rem;
+}
+.profile-details-list li:last-child,
+.dashboard-actions li:last-child {
+    border-bottom: none;
+}
+.profile-details-list strong {
+    color: var(--color-text); /* Standard text color for labels in list */
+    min-width: 100px; /* Align values */
+    display: inline-block;
+}
+.profile-bio p {
+    margin-top: var(--spacing-1);
+    padding-left: 100px; /* Align with other values */
+    color: var(--color-text-muted);
+}
+.snapshot-edit-link {
+    margin-top: var(--spacing-3);
+    text-align: right;
+}
+.dashboard-actions a {
+    display: block;
+    text-decoration: none;
+    color: var(--color-primary-light);
+    font-weight: 500;
+}
+.dashboard-actions a:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+.dashboard-actions .action-status {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    margin-top: var(--spacing-1);
+}
+
+/* Quick Actions Section */
+.dashboard-actions {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Reset default ul margin */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
+    gap: var(--spacing-4); /* Space between action items */
+    margin-top: var(--spacing-3); /* Space below the "Quick Actions" section title */
+}
+
+.dashboard-actions li {
+    padding: 0; /* Reset default li padding */
+    margin: 0;
+}
+
+.dashboard-actions li a {
+    display: block; /* Make the entire area clickable */
+    background-color: var(--color-surface); /* Base background for the action item */
+    padding: var(--spacing-3) var(--spacing-4); /* Inner padding */
+    border-radius: var(--border-radius-lg); /* Consistent rounded corners */
+    text-decoration: none;
+    color: var(--color-headings); /* Default color for the main action title */
+    font-size: var(--font-size-lg, 1.1rem); /* Default size for the main action title */
+    font-weight: var(--font-weight-semibold, 600); /* Make the title a bit bolder */
+    box-shadow: var(--shadow-sm); /* Softer initial shadow for a cleaner look */
+    border: 1px solid var(--color-border-light, transparent); /* Subtle or transparent initial border */
+    transition: transform 0.15s ease-out, 
+                box-shadow 0.15s ease-out, 
+                background-color 0.15s ease-out,
+                border-color 0.15s ease-out,
+                color 0.15s ease-out;
+    min-height: 110px; /* Provide a consistent minimum height */
+    position: relative; /* For potential future additions like icons */
+}
+
+.dashboard-actions li a:hover,
+.dashboard-actions li a:focus { /* Combined hover and focus states */
+    transform: translateY(-3px); /* Subtle lift effect */
+    box-shadow: var(--shadow-md); /* Slightly more pronounced shadow */
+    border-color: var(--color-primary); /* Highlight border with primary color */
+    background-color: var(--color-surface-accent, var(--color-surface)); /* Optional background change on hover */
+    color: var(--color-primary); /* Change text color to primary on hover/focus */
+    outline: 2px solid transparent; /* Ensure focus is visible if default outline is removed elsewhere */
+    outline-offset: 2px;
+}
+
+/* Style for the descriptive text within the action item */
+.dashboard-actions li a .action-status {
+    display: block;
+    font-size: var(--font-size-sm, 0.875rem); /* Slightly increased for better readability */
+    font-weight: var(--font-weight-normal); /* Standard weight for descriptive text */
+    line-height: 1.5; /* Good line height for readability */
+    margin-top: var(--spacing-1); /* Space between the action title and this status text */
+}
+
+.dashboard-actions li a:hover .action-status,
+.dashboard-actions li a:focus .action-status {
+    color: var(--color-primary-dark, var(--color-text-muted)); /* Keep status text muted or slightly less prominent than title on hover */
+}
+
+/* Responsive adjustments for dashboard actions */
+@media (max-width: 768px) {
+    .dashboard-actions {
+        grid-template-columns: 1fr; /* Stack actions on smaller screens */
+        gap: var(--spacing-3); /* Adjust gap for stacked items */
+    }
+    .dashboard-actions li a {
+        padding: var(--spacing-3);
+        font-size: var(--font-size-md, 1rem); /* Adjust title font size for mobile */
+        min-height: auto; /* Allow height to adjust to content on mobile */
+    }
+    .dashboard-actions li a .action-status {
+        font-size: var(--font-size-xs, 0.8rem); /* Adjust status font size for mobile */
+    }
+}
+
+/* Settings Page Specifics */
+.settings-section {
+    margin-bottom: var(--spacing-5);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-extralight);
+}
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.settings-section h2 { /* H2 for section titles on settings page */
+    font-size: 1.6rem; /* Slightly smaller than .section-title */
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
+}
+
+.setting-item { /* For edit_profile.php */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin-bottom: var(--spacing-3);
+}
+@media (min-width: 768px) {
+    .setting-item {
+        flex-direction: row;
+        gap: var(--spacing-3);
+        align-items: flex-start;
+    }
+    .setting-label {
+        flex: 0 0 200px; /* Fixed width for labels */
+    }
+    .setting-control {
+        flex: 1 1 auto;
+    }
+}
+.setting-label label {
+    font-weight: 600; /* Make labels more prominent */
+    color: var(--color-headings);
+}
+.setting-description {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    display: block;
+    margin-top: var(--spacing-1);
+}
+.setting-actions { /* For save buttons within a specific setting form */
+    margin-top: var(--spacing-3);
+    justify-content: flex-start;
+}
+.page-actions { /* For "Back to Dashboard" type links */
+    margin-top: var(--spacing-5);
+    text-align: center;
+}
+hr.section-divider { /* For <hr> between settings sections */
+    margin: var(--spacing-5) 0;
+    border-color: var(--color-border);
+}
+
+/* Table Styling (e.g., manage_articles.php) */
+.table-container {
+    overflow-x: auto; /* Allow horizontal scrolling for tables on small screens */
+    background-color: var(--color-surface-accent);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+.styled-table {
+    width: 100%;
+    border-collapse: collapse; /* Remove gaps between cells */
+    font-size: 0.9rem;
+}
+.styled-table th,
+.styled-table td {
+    padding: var(--spacing-2) var(--spacing-3);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+.styled-table thead th {
+    background-color: var(--color-surface); /* Slightly different from table body rows */
+    color: var(--color-headings);
+    font-weight: 600;
+    border-bottom-width: 2px; /* Thicker border below header */
+    border-color: var(--color-border-light);
+}
+.styled-table tbody tr:last-child td {
+    border-bottom: none; /* No border for the last row */
+}
+.styled-table tbody tr:hover {
+    background-color: rgba(var(--color-primary-rgb), 0.05); /* Subtle hover effect */
+}
+.styled-table .actions-cell {
+    text-align: right;
+    white-space: nowrap;
+}
+.styled-table .actions-cell form {
+    display: inline-block; /* Keep delete button next to edit */
+    margin-left: var(--spacing-1);
+}
+.styled-table .actions-cell .button {
+    margin-left: var(--spacing-1);
+}
+
+/* Hero Section (e.g., on homepage) */
+.hero-section {
+    background-color: var(--color-surface); /* Can be different, e.g. a gradient or image */
+    padding: var(--spacing-6) var(--spacing-4);
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-5); /* Space below hero */
+}
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.hero-title { /* H1 */
+    font-size: 2.8rem;
+    color: var(--color-headings);
+    margin-top: 0;
+    margin-bottom: var(--spacing-2);
+    font-weight: 700;
+}
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-4);
+    line-height: 1.8;
+}
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-3);
+    flex-wrap: wrap;
+}
+
+/* Call to Action Section */
+.call-to-action {
+    background-color: var(--color-primary);
+    color: var(--color-primary-contrast);
+    padding: var(--spacing-5) var(--spacing-4);
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    margin-top: var(--spacing-5);
+}
+.call-to-action .section-title { /* H2 */
+    color: var(--color-primary-contrast);
+    border-bottom: none;
+    margin-bottom: var(--spacing-2);
+}
+.call-to-action p {
+    color: rgba(var(--color-primary-contrast-rgb, 255, 255, 255), 0.9); /* Slightly transparent white */
+    margin-bottom: var(--spacing-4);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.call-to-action .cta-actions .button-primary {
+    background-color: var(--color-primary-contrast);
+    color: var(--color-primary);
+    border-color: var(--color-primary-contrast);
+}
+.call-to-action .cta-actions .button-primary:hover {
+    background-color: rgba(var(--color-primary-contrast-rgb, 255, 255, 255), 0.9);
+}
+.call-to-action .cta-actions .button-secondary {
+    background-color: transparent;
+    color: var(--color-primary-contrast);
+    border-color: var(--color-primary-contrast);
+}
+.call-to-action .cta-actions .button-secondary:hover {
+    background-color: rgba(var(--color-primary-contrast-rgb, 255, 255, 255), 0.1);
+}
+
+/* Utility Classes */
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+
+.sr-only { /* Screen-reader only */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Styles for authentication page titles */
+.auth-page-main-title.page-title {
+    text-align: center;
+    margin-top: 0;
+}
+
+/* --- News Page Styles --- */
+
+.news-page-container {
+    max-width: 900px; /* Оптимальная ширина для чтения статей */
+    margin: var(--spacing-3) auto var(--spacing-5) auto; /* Уменьшен верхний отступ, нижний оставлен прежним */
+    padding: var(--spacing-4);
+}
+
+.news-page-container .page-title {
+    /* Стили для .page-title уже должны быть */
+    text-align: center;
+    margin-bottom: var(--spacing-5);
+}
+
+/* --- Single Article View --- */
+.single-article {
+    background-color: var(--color-surface, #fff); /* Фон для одиночной статьи */
+    padding: var(--spacing-5);
+    margin-bottom: var(--spacing-5);
+}
+
+.single-article-title {
+    font-size: var(--font-size-xxxl, 2.8rem); /* Крупный заголовок для статьи */
+    color: var(--color-headings);
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
+    line-height: 1.2;
+}
+
+.article-meta {
+    font-size: var(--font-size-sm, 0.9rem);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-border-extralight, #f0f0f0);
+}
+.article-meta p,
+.article-meta span { /* Для элементов меты в ленте */
+    display: inline-block; /* Располагаем дату и автора в одну строку */
+    margin-right: var(--spacing-3);
+    margin-bottom: var(--spacing-1); /* Небольшой отступ снизу, если переносятся */
+}
+.article-meta .author-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.article-content {
+    font-size: var(--font-size-md, 1rem); /* Размер основного текста статьи */
+    line-height: 1.8; /* Увеличенный межстрочный интервал для читаемости */
+    color: var(--color-text-main);
+    margin-bottom: var(--spacing-5);
+}
+.article-content p {
+    margin-bottom: var(--spacing-3);
+}
+.article-content h2, .article-content h3, .article-content h4 { /* Стили для подзаголовков внутри статьи */
+    margin-top: var(--spacing-4);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-headings);
+}
+.article-content ul, .article-content ol {
+    margin-bottom: var(--spacing-3);
+    padding-left: var(--spacing-4);
+}
+.article-content blockquote {
+    border-left: 3px solid var(--color-primary);
+    padding-left: var(--spacing-3);
+    margin: var(--spacing-3) 0;
+    font-style: italic;
+    color: var(--color-text-secondary);
+}
+.article-content pre { /* Для блоков кода, если будут */
+    background-color: var(--color-surface-code, var(--color-background-alt));
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-md);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-3);
+}
+
+
+/* --- Category Filter Section (News Page) --- */
+.category-filter-section {
+    background-color: var(--color-surface-accent, var(--color-background-alt)); /* Легкий фон для блока фильтра */
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-5); /* Отступ под блоком категорий */
+    border: 1px solid var(--color-border-light, #eee);
+}
+
+.category-filter-title {
+    font-size: var(--font-size-lg, 1.25rem);
+    color: var(--color-headings);
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
+}
+
+.category-filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Располагаем категории в ряд */
+    flex-wrap: wrap; /* Позволяем переноситься на новую строку */
+    gap: var(--spacing-2); /* Пространство между категориями */
+}
+
+.category-link {
+    display: inline-block;
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-surface, #fff); /* Фон для кнопки категории */
+    color: var(--color-text);
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm, 0.9rem);
+    border: 1px solid var(--color-border, #ddd);
+    transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+}
+
+.category-link:hover {
+    background-color: var(--color-primary-ultralight, #e9f2ff);
+    color: var(--color-primary-dark, var(--color-primary));
+    border-color: var(--color-primary-light, var(--color-primary));
+}
+
+.category-link.is-active {
+    background-color: var(--color-primary);
+    color: var(--color-button-text, #fff); /* Цвет текста для активной кнопки */
+    border-color: var(--color-primary-dark, var(--color-primary));
+    font-weight: var(--font-weight-semibold);
+}
+.category-link.is-active:hover {
+    background-color: var(--color-primary-dark); /* Чуть темнее при наведении на активную */
+    color: var(--color-button-text, #fff);
+}
+
+
+/* --- News Feed View (List of Articles) --- */
+
+.news-feed-item {
+    background-color: var(--color-surface, #fff); /* Фон для каждого элемента ленты */
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm); /* Меньшая тень для элементов ленты */
+    margin-bottom: var(--spacing-5); /* Отступ между статьями в ленте */
+    border: 1px solid var(--color-border-light, #eee);
+}
+.news-feed-item:last-child {
+    margin-bottom: 0;
+}
+
+.news-feed-item-title {
+    font-size: var(--font-size-xl, 1.8rem); /* Заголовок статьи в ленте */
+    margin-top: 0;
+    margin-bottom: var(--spacing-2);
+}
+.news-feed-item-title a {
+    color: var(--color-headings);
+    text-decoration: none;
+    transition: color var(--transition-duration) ease;
+}
+.news-feed-item-title a:hover {
+    color: var(--color-primary);
+}
+
+/* .article-meta стили уже определены выше и подойдут для ленты */
+
+.news-feed-item-content {
+    font-size: var(--font-size-md, 1rem);
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-3);
+}
+.news-feed-item-content p:last-child {
+    margin-bottom: 0;
+}
+
+.news-feed-item .read-more-link.button.button-outline.button-small {
+    margin-top: var(--spacing-3);
+    align-self: flex-start; /* Кнопка не растягивается */
+    /* Дополнительные стили для кнопки "Read More", если нужно */
+}
+
+
+/* --- Comments Section (applies to single article view) --- */
+.comments-section {
+    margin-top: var(--spacing-6);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-border, #ddd);
+}
+
+.comments-section-title {
+    font-size: var(--font-size-xl, 1.75rem);
+    color: var(--color-headings);
+    margin-bottom: var(--spacing-4);
+}
+
+.comments-list .comment-item {
+    background-color: var(--color-surface-accent, var(--color-background-alt));
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-3);
+    border: 1px solid var(--color-border-light, #eee);
+}
+.comments-list .comment-item:last-child {
+    margin-bottom: 0;
+}
+
+.comment-author {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-1);
+    font-size: var(--font-size-md);
+}
+.comment-author .comment-date {
+    font-size: var(--font-size-xs, 0.8rem);
+    color: var(--color-text-muted);
+    font-weight: var(--font-weight-normal);
+}
+
+.comment-content {
+    font-size: var(--font-size-sm, 0.9rem);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    white-space: pre-wrap; /* Сохраняем переносы строк */
+}
+.comment-content p:last-child {
+    margin-bottom: 0;
+}
+
+.no-comments-message {
+    font-style: italic;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-4);
+}
+
+.comment-form {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-4);
+    background-color: var(--color-surface-accent, var(--color-background-alt));
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-border-light, #eee);
+}
+.comment-form .form-label {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-2);
+}
+.comment-form textarea.form-control {
+    min-height: 100px;
+    /* Стили для .form-control должны наследоваться */
+}
+.comment-form .button {
+    margin-top: var(--spacing-3);
+}
+
+.login-prompt {
+    margin-top: var(--spacing-4);
+    font-size: var(--font-size-md);
+}
+.login-prompt a {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* --- Edit Profile / Account Settings Page Styles --- */
+
+/* Используем .form-page-container как основной контейнер,
+   .account-settings-container для специфичных настроек, если нужно */
+
+.account-settings-container h1 {
+    /* Стили для h1 уже должны быть покрыты .form-page-container h1 */
+    /* Если нужен другой стиль, можно добавить сюда */
+    margin-bottom: var(--spacing-5);
+}
+
+/* Секции настроек (например, Profile Details, Change Password) */
+.settings-section {
+    background-color: var(--color-surface-accent, var(--color-background-alt)); /* Слегка другой фон для секции */
+    padding: var(--spacing-4);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-5);
+    border: 1px solid var(--color-border-light, #eee);
+}
+
+.settings-section h2 {
+    font-size: var(--font-size-xl, 1.75rem);
+    color: var(--color-headings);
+    margin-top: 0;
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-border, #ddd);
+}
+
+/* Стили для каждого элемента настройки (метка + поле ввода) */
+.setting-item {
+    display: flex;
+    flex-wrap: wrap; /* Позволит переноситься на мобильных */
+    gap: var(--spacing-3); /* Пространство между меткой и полем */
+    margin-bottom: var(--spacing-4);
+    align-items: flex-start; /* Выравнивание по верху, если описания разной длины */
+}
+
+.setting-label {
+    flex: 1 1 250px; /* Метка занимает часть ширины, но может сжиматься/растягиваться */
+    min-width: 200px; /* Минимальная ширина для блока с меткой */
+}
+
+.setting-label label {
+    display: block;
+    font-weight: var(--font-weight-semibold, 600);
+    font-size: var(--font-size-md, 1rem);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-1); /* Меньший отступ, так как есть описание */
+}
+
+.setting-label .setting-description {
+    display: block;
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-muted, #6c757d);
+    line-height: 1.4;
+}
+
+.setting-control {
+    flex: 2 1 400px; /* Поле ввода занимает больше места */
+    min-width: 250px; /* Минимальная ширина для поля ввода */
+}
+
+/* Стили для .form-control, .form-control:focus, .is-invalid, .error-text
+   должны наследоваться от общих стилей для .form-page-container,
+   которые мы определили ранее. Если нужны специфичные переопределения,
+   можно добавить их сюда с селектором .account-settings-container ... */
+
+.account-settings-container .form-control[disabled] {
+    background-color: var(--color-surface-disabled, #e9ecef); /* Фон для неактивных полей */
+    color: var(--color-text-disabled, #6c757d);
+    cursor: not-allowed;
+    border-color: var(--color-border-disabled, #ced4da);
+    box-shadow: none; /* Убираем тень у неактивных полей */
+}
+.account-settings-container textarea.form-control {
+    min-height: 100px; /* Стандартная высота для textarea */
+}
+
+
+/* Блок с кнопками действий внутри формы */
+.account-settings-container .form-actions.setting-actions {
+    /* Стили для .form-actions уже должны быть (flex, justify-content: flex-end и т.д.) */
+    /* Если нужно специфичное выравнивание или отступы для этой страницы: */
+    margin-top: var(--spacing-4); /* Отступ перед кнопками */
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-border-light, #eee);
+}
+
+/* Секция с ссылкой "Назад на дашборд" */
+.account-settings-container .page-actions {
+    margin-top: var(--spacing-5);
+    text-align: center; /* Или left/right по вашему усмотрению */
+}
+
+
+/* Адаптивность для страницы настроек */
+@media (max-width: 768px) {
+    .setting-item {
+        flex-direction: column; /* Метка и поле друг под другом */
+        gap: var(--spacing-2);
+        align-items: stretch; /* Растягиваем элементы на всю ширину */
+    }
+    .setting-label {
+        flex-basis: auto; /* Сбрасываем flex-basis */
+        margin-bottom: var(--spacing-2); /* Отступ под блоком метки */
+        min-width: auto;
+    }
+    .setting-control {
+        flex-basis: auto;
+        min-width: auto;
+    }
+
+}
+
+/* --- Manage Articles Page (Admin-like Table View) Styles --- */
+
+.admin-content-container {
+    max-width: 1200px; /* Шире, так как таблицы могут быть большими */
+    margin: var(--spacing-5) auto;
+    padding: var(--spacing-4);
+    background-color: var(--color-surface, #fff); /* Фон контейнера */
+}
+
+.admin-content-container h1 {
+    font-size: var(--font-size-xxl, 2.5rem);
+    color: var(--color-headings, var(--color-primary));
+    margin-top: 0;
+    margin-bottom: var(--spacing-4);
+    text-align: center; /* Или left */
+}
+
+.admin-actions-bar {
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-light, #eee);
+    display: flex;
+    justify-content: flex-end; /* Кнопка "Create New" справа */
+}
+
+
+/* Стили для сообщений (если они будут отображаться здесь, например, "No articles found") */
+.admin-content-container .message {
+    padding: var(--spacing-3) var(--spacing-4);
+    margin: var(--spacing-4) 0; /* Отступы сверху и снизу */
+    border-radius: var(--border-radius-md);
+    border-width: 1px;
+    border-style: solid;
+    font-size: var(--font-size-md);
+}
+.admin-content-container .message p { margin: 0; }
+
+.admin-content-container .message--info {
+    background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.1);
+    border-color: var(--color-info, #0dcaf0);
+    color: var(--color-info-dark, #087990);
+}
+.admin-content-container .message--empty-state { /* Для состояния "нет данных" */
+    text-align: center;
+    padding: var(--spacing-5) var(--spacing-4);
+}
+.admin-content-container .message--empty-state p {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-3);
+}
+.admin-content-container .message--empty-state .button {
+    font-size: var(--font-size-md);
+}
+
+
+/* Стили для таблицы */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Горизонтальный скролл для таблицы на малых экранах */
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+    border: 1px solid var(--color-border, #dee2e6); /* Граница вокруг обертки таблицы */
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-4);
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse; /* Убираем двойные границы */
+    background-color: var(--color-surface-accent, var(--color-background)); /* Фон таблицы, если отличается от фона контейнера */
+    color: var(--color-text); /* Основной цвет текста в таблице */
+    font-size: var(--font-size-sm, 0.9rem); /* Размер шрифта для таблицы */
+}
+
+.styled-table th,
+.styled-table td {
+    padding: var(--spacing-3) var(--spacing-3); /* Отступы в ячейках */
+    text-align: left;
+    border-bottom: 1px solid var(--color-border, #dee2e6); /* Горизонтальные разделители */
+    vertical-align: middle; /* Выравнивание по центру по вертикали */
+}
+
+.styled-table thead th {
+    background-color: var(--color-surface-header, var(--color-primary-ultralight)); /* Фон заголовков таблицы */
+    color: var(--color-headings-table, var(--color-primary-dark)); /* Цвет текста заголовков */
+    font-weight: var(--font-weight-semibold, 600);
+    border-bottom-width: 2px; /* Более жирная нижняя граница для заголовков */
+    border-color: var(--color-primary, #007bff); /* Цвет границы заголовков */
+    white-space: nowrap; /* Предотвращаем перенос текста в заголовках */
+}
+
+.styled-table tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: var(--color-surface-zebra, rgba(0,0,0,0.02)); /* Чередование строк, если фон таблицы светлый */
+    /* Если фон таблицы темный, чередование может не понадобиться или быть другим */
+}
+
+.styled-table tbody tr:hover {
+    background-color: var(--color-surface-hover, rgba(var(--color-primary-rgb), 0.075)); /* Подсветка строки при наведении */
+}
+
+.styled-table td a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+.styled-table td a:hover {
+    text-decoration: underline;
+    color: var(--color-primary-dark);
+}
+
+/* Ячейка с действиями */
+.styled-table .actions-cell {
+    white-space: nowrap; /* Предотвращаем перенос кнопок */
+    min-width: 160px; /* Минимальная ширина для кнопок */
+}
+
+.styled-table .actions-cell .button {
+    margin-right: var(--spacing-2);
+    margin-bottom: var(--spacing-1); /* Для случая, если кнопки переносятся на мобильных */
+    padding: var(--button-padding-y-sm, 0.25rem) var(--button-padding-x-sm, 0.5rem); /* Маленькие кнопки */
+    font-size: var(--font-size-xs, 0.8rem);
+}
+.styled-table .actions-cell .button:last-child {
+    margin-right: 0;
+}
+
+.styled-table .actions-cell form {
+    display: inline-block; /* Формы для кнопок в одну строку */
+    margin: 0;
+}
+
+
+/* Адаптивность для таблицы */
+@media (max-width: 768px) {
+    .admin-content-container h1 {
+        font-size: var(--font-size-xl, 2rem);
+    }
+    .admin-actions-bar {
+        justify-content: center; /* Кнопка по центру на мобильных */
+    }
+    /* На очень маленьких экранах можно скрыть некоторые колонки или изменить отображение таблицы,
+       но это требует более сложной логики или JavaScript.
+       Пока что .table-responsive обеспечит горизонтальный скролл. */
+    .styled-table th,
+    .styled-table td {
+        padding: var(--spacing-2); /* Уменьшаем отступы в ячейках */
+        font-size: var(--font-size-xs, 0.85rem); /* Уменьшаем шрифт */
+    }
+    .styled-table .actions-cell .button {
+        display: block; /* Кнопки одна под другой для экономии места */
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: var(--spacing-2);
+    }
+    .styled-table .actions-cell .button:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* --- Create/Edit Article Form Page Styles --- */
+
+.form-page-container {
+    max-width: 800px; /* Оптимальная ширина для форм */
+    margin: var(--spacing-5) auto;
+    padding: var(--spacing-5);
+    background-color: var(--color-surface, #fff); /* Фон контейнера формы */
+}
+
+.form-page-back-link { /* Стиль для кнопки "Назад" */
+    margin-bottom: var(--spacing-4); /* Используем переменную для отступа */
+    display: inline-block;
+    font-size: var(--font-size-sm); /* Можно сделать ее чуть меньше */
+}
+
+.form-page-container .page-title, /* Если у вас есть общий класс для заголовков страниц */
+.form-page-container h1 {
+    font-size: var(--font-size-xxl, 2.5rem); /* Размер заголовка */
+    color: var(--color-headings, var(--color-primary));
+    text-align: center;
+    margin-top: 0; /* Убираем верхний отступ, если он уже есть у контейнера */
+    margin-bottom: var(--spacing-5); /* Отступ под заголовком */
+}
+
+/* Общие стили для сообщений (flash_messages) */
+.form-page-container .messages {
+    padding: var(--spacing-3) var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    border-radius: var(--border-radius-md);
+    border-width: 1px;
+    border-style: solid;
+    font-size: var(--font-size-md);
+    display: flex; /* Для возможного добавления иконки */
+    align-items: center;
+}
+.form-page-container .messages p {
+    margin: 0;
+    flex-grow: 1;
+}
+/* Иконки для сообщений (пример, можно использовать SVG или font icons) */
+.form-page-container .messages::before {
+    /* content: ''; */ /* Задается ниже для каждого типа */
+    margin-right: var(--spacing-2);
+    font-size: 1.2em; /* Размер иконки */
+}
+
+.form-page-container .messages.success {
+    background-color: rgba(var(--color-success-rgb, 25, 135, 84), 0.1);
+    border-color: var(--color-success, #198754);
+    color: var(--color-success-dark, #12613c);
+}
+/* .form-page-container .messages.success::before { content: '✔'; } */ /* Пример иконки */
+
+.form-page-container .messages.error {
+    background-color: rgba(var(--color-danger-rgb, 220, 53, 69), 0.1);
+    border-color: var(--color-danger, #dc3545);
+    color: var(--color-danger-dark, #a32835);
+}
+/* .form-page-container .messages.error::before { content: '✖'; } */ /* Пример иконки */
+
+.form-page-container .messages.info {
+    background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.1);
+    border-color: var(--color-info, #0dcaf0);
+    color: var(--color-info-dark, #087990);
+}
+/* .form-page-container .messages.info::before { content: 'ℹ'; } */ /* Пример иконки */
+
+
+/* Стили для групп полей формы */
+.form-page-container .form-group {
+    margin-bottom: var(--spacing-4); /* Отступ между группами полей */
+}
+
+.form-page-container .form-label,
+.form-page-container label { /* Общий стиль для label */
+    display: block;
+    margin-bottom: var(--spacing-2);
+    font-weight: var(--font-weight-semibold, 600); /* Более жирные метки */
+    font-size: var(--font-size-md, 1rem);
+    color: var(--color-text);
+}
+
+.form-page-container .text-danger { /* Переносим из инлайн-стилей */
+    color: var(--color-danger, #dc3545);
+    font-weight: var(--font-weight-normal); /* Чтобы звездочка не была слишком жирной */
+}
+
+.form-page-container .form-control {
+    display: block;
+    width: 100%;
+    padding: var(--input-padding-y, 0.75rem) var(--input-padding-x, 1rem); /* Увеличенные паддинги */
+    font-size: var(--input-font-size, 1rem);
+    font-weight: var(--input-font-weight, 400);
+    line-height: var(--input-line-height, 1.5);
+    color: var(--input-color, var(--color-text));
+    background-color: var(--input-bg, var(--color-background-alt)); /* Фон инпута, может быть светлее основного фона формы */
+    background-clip: padding-box;
+    border: 1px solid var(--input-border-color, var(--color-border));
+    appearance: none;
+    border-radius: var(--input-border-radius, var(--border-radius-md));
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-page-container .form-control:focus {
+    color: var(--input-focus-color, var(--color-text));
+    background-color: var(--input-focus-bg, var(--color-background-alt));
+    border-color: var(--input-focus-border-color, var(--color-primary));
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(var(--color-primary-rgb, 78, 115, 223), 0.25);
+}
+
+.form-page-container .form-control::placeholder {
+    color: var(--input-placeholder-color, #6c757d);
+    opacity: 1;
+}
+
+/* Стили для невалидных полей */
+.form-page-container .form-control.is-invalid {
+    border-color: var(--color-danger, #dc3545) !important; /* !important чтобы перебить :focus */
+    /* Внутренняя тень для невалидного поля, можно сделать красной или комбинировать */
+    box-shadow: var(--shadow-inner, inset 0 2px 4px 0 rgba(0,0,0,0.1)), 0 0 0 0.2rem rgba(var(--color-danger-rgb, 220, 53, 69), 0.15);
+}
+.form-page-container .form-control.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--color-danger-rgb, 220, 53, 69), 0.25);
+}
+
+
+.form-page-container .error-text { /* Переносим из инлайн-стилей */
+    color: var(--color-danger, #dc3545);
+    font-size: var(--font-size-sm, 0.875rem); /* Немного увеличил для читаемости */
+    margin-top: var(--spacing-1);
+    display: block; /* Убедимся, что это блок */
+}
+
+.form-page-container textarea.form-control {
+    min-height: 120px; /* Стандартная высота для textarea */
+    resize: vertical;
+}
+
+.form-page-container .form-text.text-muted {
+    display: block; /* Чтобы занимал всю ширину под полем */
+    font-size: var(--font-size-sm, 0.875rem);
+    color: var(--color-text-muted, #6c757d);
+    margin-top: var(--spacing-1);
+    line-height: 1.4;
+}
+
+.form-page-container .form-actions {
+    margin-top: var(--spacing-5); /* Больший отступ перед кнопками */
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-border-light, #eee);
+    display: flex;
+    justify-content: flex-end; /* Кнопки справа */
+    gap: var(--spacing-3); /* Пространство между кнопками */
+}
+
+/* Стили для input[type="date"] */
+.form-page-container input[type="date"].form-control {
+    /* Можно добавить кастомные стили для datepicker, если браузерные не устраивают, но это сложно */
+    /* Пока оставляем стандартные */
+    min-width: 200px; /* Чтобы дата помещалась */
+    max-width: 250px; /* Ограничим ширину */
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .form-page-container {
+        margin: var(--spacing-3) auto;
+        padding: var(--spacing-4);
+        border-radius: var(--border-radius-lg); /* Можно уменьшить радиус на мобильных */
+    }
+    .form-page-container .page-title,
+    .form-page-container h1 {
+        font-size: var(--font-size-xl, 2rem); /* Уменьшаем заголовок */
+        margin-bottom: var(--spacing-4);
+    }
+    .form-page-container .form-actions {
+        flex-direction: column; /* Кнопки одна под другой */
+        align-items: stretch; /* Растягиваем кнопки на всю ширину */
+    }
+    .form-page-container .form-actions .button {
+        width: 100%; /* Кнопки на всю ширину */
+    }
+    .form-page-container .form-actions .button:not(:last-child) {
+        margin-bottom: var(--spacing-3); /* Отступ между кнопками в колонке */
+    }
+}

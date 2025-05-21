@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  RewriteRule ^$ public/index.php [L,QSA]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.+)$ public/index.php [L,QSA]
+
+</IfModule>
+
+Options -Indexes
+
+AddDefaultCharset UTF-8

@@ -7,14 +7,10 @@ if (isset($_SESSION['user_id'])) {
 
 // Form data (if there were validation errors)
 $form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : ['username' => '', 'email' => ''];
-// Errors and success messages from session
-$errors = $_SESSION['errors'] ?? [];
-$success_message = $_SESSION['success_message'] ?? null;
+// Errors and success messages are now part of $page_messages, passed from index.php
 
-// Clear session after use
-unset($_SESSION['errors']);
-unset($_SESSION['success_message']);
-// form_data will be cleared at the end of the file if that's your logic
+// Clear form_data after use if needed
+unset($_SESSION['form_data']);
 
 // Use a common CSRF token for registration
 $csrf_token = $_SESSION['csrf_token_register'] ?? ''; // Use csrf_token_register
@@ -27,28 +23,33 @@ if (empty($csrf_token)) {
 <div class="auth-page-container auth-layout-split">
     <div class="auth-layout-column auth-layout-column-info">
         <h1 class="page-title auth-page-main-title">Create Your Account</h1>
-        <div class="auth-warning-message">
-            <p><strong>Important Security Notice:</strong></p>
-            <p>Choose a strong, unique password and never share it. Our administrators will <strong>never</strong> ask for your password or other sensitive information. Be vigilant against phishing attempts.</p>
-        </div>
     </div>
     <div class="auth-layout-column auth-layout-column-form">
         <div class="auth-form-card">
             <?php
-            // Display error messages
-            if (!empty($errors)) {
-                echo '<div class="messages errors">';
-                foreach ($errors as $error) {
-                    echo '<p>' . htmlspecialchars($error) . '</p>';
+            // Display messages from $page_messages
+            if (!empty($page_messages)) { // $page_messages comes from index.php
+                foreach ($page_messages as $message) {
+                    // Determine class based on message type
+                    $messageTypeClass = 'info'; // default
+                    if (isset($message['type'])) {
+                        switch (strtolower($message['type'])) {
+                            case 'success':
+                                $messageTypeClass = 'success';
+                                break;
+                            case 'error':
+                            case 'errors': // for compatibility
+                                $messageTypeClass = 'errors';
+                                break;
+                            case 'warning':
+                                $messageTypeClass = 'warning';
+                                break;
+                        }
+                    }
+                    echo '<div class="messages ' . htmlspecialchars($messageTypeClass) . '">';
+                    echo '<p>' . htmlspecialchars($message['text']) . '</p>';
+                    echo '</div>';
                 }
-                echo '</div>';
-            }
-
-            // Display success messages (if applicable on this page)
-            if ($success_message) {
-                echo '<div class="messages success">';
-                echo '<p>' . htmlspecialchars($success_message) . '</p>';
-                echo '</div>';
             }
             ?>
             <form action="/modules/register_process.php" method="POST">
@@ -97,4 +98,3 @@ if (empty($csrf_token)) {
         </div>
     </div>
 </div>
-<?php unset($_SESSION['form_data']); ?>

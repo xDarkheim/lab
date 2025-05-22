@@ -2,13 +2,14 @@
 
 use App\Models\Article;
 use App\Models\User;
-// use App\Models\Category; // Not directly used, categories are fetched via Article model
 use App\Lib\Database;
+use App\Lib\FlashMessageService;
 
 $pageTitle = "Manage Articles";
+$flashMessageService = new FlashMessageService();
 
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You must be logged in to manage articles.']];
+    $flashMessageService->addError('You must be logged in to manage articles.');
     $redirect_url = urlencode('/index.php?page=manage_articles');
     header('Location: /index.php?page=login&redirect=' . $redirect_url);
     exit;
@@ -23,11 +24,11 @@ $current_user_id = (int)$_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'user';
 
 $database_handler = new Database();
-$articles_view_data = []; // Renamed for clarity: data prepared for view
+$articles_view_data = [];
 $db_connection_error = false;
 
 if (!$database_handler->getConnection()) {
-    $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Failed to connect to the database. Article list cannot be loaded.'];
+    $flashMessageService->addError('Failed to connect to the database. Article list cannot be loaded.');
     $db_connection_error = true;
 } else {
     $articles = ($user_role === 'admin')
@@ -40,7 +41,7 @@ if (!$database_handler->getConnection()) {
         $authors_map = [];
         if (!empty($user_ids_to_fetch)) {
             foreach ($user_ids_to_fetch as $uid) {
-                $author = User::findById($database_handler, $uid); // uid is already int or null
+                $author = User::findById($database_handler, $uid);
                 $authors_map[$uid] = $author ? $author->getUsername() : 'Unknown User';
             }
         }
@@ -63,16 +64,27 @@ if (!$database_handler->getConnection()) {
 }
 ?>
 
-<div class="admin-content-container page-container">
-    <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-
-    <div class="admin-actions-bar">
+<div class="page-container manage-articles-page">
+    <div class="page-header">
+        <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
         <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create New Article</a>
     </div>
 
-    <?php if ($db_connection_error && empty($articles_view_data)): ?>
-        <?php /* Flash message for DB error is already set */ ?>
-    <?php elseif (empty($articles_view_data) && !$db_connection_error): ?>
+    <?php if (!empty($page_messages)): ?>
+        <?php foreach ($page_messages as $message): ?>
+            <div class="messages <?php echo htmlspecialchars($message['type']); ?>">
+                <p><?php echo htmlspecialchars($message['text']); ?></p>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php if ($db_connection_error && empty($page_messages)): ?>
+        <div class="messages error">
+            <p>Failed to connect to the database. Article list cannot be loaded.</p>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!$db_connection_error && empty($articles_view_data)): ?>
         <div class="message message--info message--empty-state">
             <p>No articles found.</p>
             <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create the First Article</a>
@@ -112,8 +124,8 @@ if (!$database_handler->getConnection()) {
                                             '<a href="/index.php?page=news&category=%s" class="category-tag-small" title="%s">' .
                                             '<span style="color: white; text-indent: 0;">%s</span></a>',
                                             $category_slug_safe,
-                                            $category_name_safe, // Tooltip for the link
-                                            $category_name_safe  // Visible text in span
+                                            $category_name_safe,
+                                            $category_name_safe
                                         );
                                     }
                                     echo implode(' ', $category_links);

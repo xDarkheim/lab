@@ -1,21 +1,24 @@
 <?php
 
+require_once dirname(dirname(__DIR__)) . '/includes/bootstrap.php';
 
-global $db;
+use App\Lib\Database;
+use App\Lib\FlashMessageService;
 
-if (!isset($_SESSION['flash_messages'])) {
-    $_SESSION['flash_messages'] = [];
-}
+$flashMessageService = new FlashMessageService();
+
+$database_handler = new Database();
+$db = $database_handler->getConnection();
 
 if (!$db) {
-    $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Database connection error.'];
+    $flashMessageService->addError('Database connection error.');
     header('Location: /index.php?page=manage_articles');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token_delete_article']) || !hash_equals($_SESSION['csrf_token_delete_article'], $_POST['csrf_token'])) {
-        $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'CSRF Error: Invalid token. Please try again.'];
+        $flashMessageService->addError('CSRF Error: Invalid token. Please try again.');
         header('Location: /index.php?page=manage_articles');
         exit;
     }
@@ -31,26 +34,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_delete = $db->prepare("DELETE FROM articles WHERE id = ?");
                 if ($stmt_delete->execute([$article_id])) {
                     if ($stmt_delete->rowCount() > 0) {
-                        $_SESSION['flash_messages'][] = ['type' => 'success', 'text' => 'Article successfully deleted.'];
+                        $flashMessageService->addSuccess('Article successfully deleted.');
                     } else {
-                        $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Article not found or already deleted during the process.'];
+                        $flashMessageService->addError('Article not found or already deleted during the process.');
                     }
                 } else {
-                    $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Failed to delete article. Please try again.'];
+                    $flashMessageService->addError('Failed to delete article. Please try again.');
                     error_log("Failed to delete article ID: $article_id. PDO Error: " . print_r($stmt_delete->errorInfo(), true));
                 }
             } else {
-                $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Article with the specified ID not found.'];
+                $flashMessageService->addError('Article with the specified ID not found.');
             }
         } catch (PDOException $e) {
-            $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Database error while deleting article: ' . $e->getMessage()];
+            $flashMessageService->addError('Database error while deleting article: ' . $e->getMessage());
             error_log("PDOException in delete_article.php for article ID $article_id: " . $e->getMessage());
         }
     } else {
-        $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Invalid article ID for deletion.'];
+        $flashMessageService->addError('Invalid article ID for deletion.');
     }
 } else {
-    $_SESSION['flash_messages'][] = ['type' => 'error', 'text' => 'Invalid request method.'];
+    $flashMessageService->addError('Invalid request method.');
 }
 
 header('Location: /index.php?page=manage_articles');

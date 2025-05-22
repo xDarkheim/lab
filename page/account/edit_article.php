@@ -3,54 +3,51 @@
 use App\Lib\Database;
 use App\Models\Article;
 use App\Models\Category;
+use App\Lib\FlashMessageService;
 
-$pageTitle = "Edit Article"; // Default page title
+$pageTitle = "Edit Article";
 
-// Initialize form variables
 $article_id = null;
 $title_form = '';
-$content_form = ''; // Corresponds to full_text
+$content_form = '';
 $short_description_form = '';
 $date_form = '';
-$selected_category_ids_for_form = []; // For populating checkboxes
+$selected_category_ids_for_form = [];
 
-// Load validation errors from session, if any
 $form_validation_errors = $_SESSION['form_validation_errors'] ?? [];
-unset($_SESSION['form_validation_errors']); // Clear after loading
+unset($_SESSION['form_validation_errors']);
 
 $database_handler = new Database();
 $db_connection = $database_handler->getConnection();
+$flashMessageService = new FlashMessageService();
 
 if (!$db_connection) {
-    $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database connection error. Cannot edit article.']];
+    $flashMessageService->addError('Database connection error. Cannot edit article.');
     header('Location: /index.php?page=manage_articles');
     exit;
 }
 
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You must be logged in to edit articles.']];
-    $redirect_url = urlencode($_SERVER['REQUEST_URI']); // Redirect back to this page after login
-    header('Location: /index.php?page=login&redirect=' . $redirect_url);
+    $flashMessageService->addError('You must be logged in to edit articles.');
+    header('Location: /index.php?page=login');
     exit;
 }
 
 $current_user_id = (int)$_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'user';
 
-// CSRF token generation for the edit form
 if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_SESSION['csrf_token_edit_article'])) {
     $_SESSION['csrf_token_edit_article'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token_edit_article'];
 
-// Fetch all categories for the selection field
 $all_categories = Category::findAll($database_handler);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !hash_equals($csrf_token, $_POST['csrf_token'])) {
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'CSRF Error: Invalid token. Please try again.']];
+        $flashMessageService->addError('CSRF Error: Invalid token. Please try again.');
         $post_article_id = filter_input(INPUT_POST, 'article_id', FILTER_VALIDATE_INT);
-        // Redirect back to edit page if possible, otherwise to manage page
+        
         $redirect_loc = $post_article_id ? '/index.php?page=edit_article&id=' . $post_article_id : '/index.php?page=manage_articles';
         header('Location: ' . $redirect_loc);
         exit;
@@ -63,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date_form = trim(filter_input(INPUT_POST, 'date', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? '');
     $selected_category_ids_post = filter_input(INPUT_POST, 'categories', FILTER_VALIDATE_INT, FILTER_REQUIRE_ARRAY) ?? [];
 
-    // Store submitted data in session for repopulation in case of errors
     $_SESSION['form_data'] = [
         'article_id' => $article_id,
         'title' => $title_form,
@@ -72,9 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'date' => $date_form,
         'categories' => $selected_category_ids_post
     ];
-    $selected_category_ids_for_form = $selected_category_ids_post; // Use posted categories for immediate form display on error
+    $selected_category_ids_for_form = $selected_category_ids_post;
 
-    // Validation
     if (empty($title_form)) $form_validation_errors['title'] = "Title cannot be empty.";
     if (empty($content_form)) $form_validation_errors['full_text'] = "Full text cannot be empty.";
     if (empty($date_form)) {
@@ -85,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($form_validation_errors)) {
         if (!$article_id) {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid article ID for update.']];
+            $flashMessageService->addError('Invalid article ID for update.');
             header('Location: /index.php?page=manage_articles');
             exit;
         }
@@ -95,12 +90,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $original_article_user_id = $stmt_check_author->fetchColumn();
 
             if ($original_article_user_id === false) {
-                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found for update.']];
+                $flashMessageService->addError('Article not found for update.');
                 header('Location: /index.php?page=manage_articles');
                 exit;
             }
             if ($original_article_user_id != $current_user_id && $user_role !== 'admin') {
-                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You do not have permission to edit this article.']];
+                $flashMessageService->addError('You do not have permission to edit this article.');
                 header('Location: /index.php?page=manage_articles');
                 exit;
             }
@@ -117,26 +112,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log("Edit_article: Could not find article ID {$article_id} to update categories after main content update.");
                 }
 
-                $_SESSION['flash_messages'] = [['type' => 'success', 'text' => 'Article updated successfully.']];
+                $flashMessageService->addSuccess('Article updated successfully.');
                 unset($_SESSION['form_data'], $_SESSION['form_validation_errors'], $_SESSION['csrf_token_edit_article']);
                 header('Location: /index.php?page=manage_articles');
                 exit;
             } else {
-                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Failed to update article. Please try again.']];
+                $flashMessageService->addError('Failed to update article. Please try again.');
                 error_log("Failed to update article ID: $article_id. PDO Error: " . print_r($stmt_update->errorInfo(), true));
             }
         } catch (\PDOException $e) {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database error during article update.']];
+            $flashMessageService->addError('Database error during article update.');
             error_log("PDOException in edit_article.php (POST): " . $e->getMessage());
         }
-        // If update failed or exception occurred, redirect back to edit form (form_data is in session)
+        
         header('Location: /index.php?page=edit_article&id=' . $article_id);
         exit;
     } else {
-        // Validation errors occurred
-        $_SESSION['form_validation_errors'] = $form_validation_errors; // Put errors back in session
-        // $_SESSION['form_data'] is already set
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Please correct the errors below.']];
+        $_SESSION['form_validation_errors'] = $form_validation_errors;
+        $flashMessageService->addError('Please correct the errors below.');
         header('Location: /index.php?page=edit_article&id=' . $article_id);
         exit;
     }
@@ -144,13 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $article_id_get = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
     if (!$article_id_get) {
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'No article ID specified or invalid ID.']];
+        $flashMessageService->addError('No article ID specified or invalid ID.');
         header('Location: /index.php?page=manage_articles');
         exit;
     }
     $article_id = $article_id_get;
 
-    // Check if there's form data from a failed POST attempt
     if (isset($_SESSION['form_data']) && isset($_SESSION['form_data']['article_id']) && $_SESSION['form_data']['article_id'] == $article_id) {
         $form_data_from_session = $_SESSION['form_data'];
         $title_form = $form_data_from_session['title'] ?? '';
@@ -158,21 +150,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $content_form = $form_data_from_session['full_text'] ?? '';
         $date_form = $form_data_from_session['date'] ?? '';
         $selected_category_ids_for_form = $form_data_from_session['categories'] ?? [];
-        // $form_validation_errors are already loaded at the top of the script
-        unset($_SESSION['form_data']); // Clear form data after use
+        
+        unset($_SESSION['form_data']);
     } else {
-        // No session data, fetch from database
         try {
             $article_object = Article::findById($database_handler, $article_id);
 
             if (!$article_object) {
-                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Article not found.']];
+                $flashMessageService->addError('Article not found.');
                 header('Location: /index.php?page=manage_articles');
                 exit;
             }
 
             if ($article_object->user_id != $current_user_id && $user_role !== 'admin') {
-                $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You do not have permission to edit this article.']];
+                $flashMessageService->addError('You do not have permission to edit this article.');
                 header('Location: /index.php?page=manage_articles');
                 exit;
             }
@@ -186,20 +177,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selected_category_ids_for_form = array_map(fn($cat) => $cat->id, $current_article_categories);
 
         } catch (\PDOException $e) {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Database error while fetching article.']];
+            $flashMessageService->addError('Database error while fetching article.');
             error_log("PDOException in edit_article.php (GET) for article ID $article_id: " . $e->getMessage());
             header('Location: /index.php?page=manage_articles');
             exit;
         }
     }
 } else {
-    // Should not happen for this page (only GET or POST)
-    $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid request method.']];
+    $flashMessageService->addError('Invalid request method.');
     header('Location: /index.php?page=manage_articles');
     exit;
 }
 
-// Set dynamic page title after fetching/setting $title_form and $article_id
 $pageTitle = "Edit Article: " . htmlspecialchars($title_form ?: "ID " . ($article_id ?? 'New'));
 
 ?>

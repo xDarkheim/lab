@@ -3,6 +3,7 @@
 use App\Models\Article;
 use App\Models\Category;
 use App\Lib\Database;
+use App\Lib\FlashMessageService;
 
 $pageTitle = "Create New Article";
 
@@ -10,9 +11,7 @@ $form_validation_errors = $_SESSION['form_validation_errors'] ?? [];
 $form_data = $_SESSION['form_data'] ?? [];
 $selected_categories_from_session = $form_data['categories'] ?? [];
 
-$flash_messages = $_SESSION['flash_messages'] ?? [];
-
-unset($_SESSION['form_validation_errors'], $_SESSION['form_data'], $_SESSION['flash_messages']);
+unset($_SESSION['form_validation_errors'], $_SESSION['form_data']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_SESSION['csrf_token_create_article'])) {
     $_SESSION['csrf_token_create_article'] = bin2hex(random_bytes(32));
@@ -20,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' || !isset($_SESSION['csrf_token_create_
 $csrf_token = $_SESSION['csrf_token_create_article'];
 
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'You must be logged in to create an article.']];
+    $flashService = new FlashMessageService();
+    $flashService->addError('You must be logged in to create an article.');
     $redirect_url = urlencode('/index.php?page=create_article');
     header('Location: /index.php?page=login&redirect=' . $redirect_url);
     exit;
@@ -28,12 +28,13 @@ if (!isset($_SESSION['user_id'])) {
 
 $current_user_id = (int)$_SESSION['user_id'];
 $database_handler = new Database();
+$flashMessageService = new FlashMessageService();
 
 $all_categories = Category::findAll($database_handler);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token_create_article'], $_POST['csrf_token'])) {
-        $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Invalid CSRF token. Please try again.']];
+        $flashMessageService->addError('Invalid CSRF token. Please try again.');
         header('Location: /index.php?page=create_article');
         exit;
     }
@@ -85,12 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $newArticle->setCategories($database_handler, $selected_category_ids);
             }
 
-            $_SESSION['flash_messages'] = [['type' => 'success', 'text' => 'Article created successfully!']];
+            $flashMessageService->addSuccess('Article created successfully!');
             unset($_SESSION['csrf_token_create_article'], $_SESSION['form_data']);
             header('Location: /index.php?page=news&id=' . $newArticleId);
             exit;
         } else {
-            $_SESSION['flash_messages'] = [['type' => 'error', 'text' => 'Failed to create article. An internal error occurred or database issue.']];
+            $flashMessageService->addError('Failed to create article. An internal error occurred or database issue.');
+            header('Location: /index.php?page=create_article');
+            exit;
         }
     } else {
         header('Location: /index.php?page=create_article');
@@ -101,17 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="page-container create-article-page">
     <a href="/index.php?page=manage_articles" class="button button-secondary form-page-back-link">&laquo; Back to Manage Articles</a>
-    <h1 style="margin-top: <?php echo (isset($_GET['from']) && $_GET['from'] === 'manage') || !empty($flash_messages) ? 'var(--spacing-3)' : '0'; ?>;"><?php echo htmlspecialchars($pageTitle); ?></h1>
+    <h1 style="margin-top: <?php echo (isset($_GET['from']) && $_GET['from'] === 'manage') || !empty($page_messages) ? 'var(--spacing-3)' : '0'; ?>;"><?php echo htmlspecialchars($pageTitle); ?></h1>
 
-    <?php if (!empty($flash_messages)): ?>
-        <?php foreach ($flash_messages as $message): ?>
+    <?php // Используем $page_messages, переданную из index.php
+    if (!empty($page_messages)): ?>
+        <?php foreach ($page_messages as $message): ?>
             <div class="messages <?php echo htmlspecialchars($message['type']); ?>">
                 <p><?php echo htmlspecialchars($message['text']); ?></p>
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <form action="/index.php?page=create_article" method="POST" class="styled-form create-article-form">
+    <form action="/index.php?page=create_article" method="POST" enctype="multipart/form-data" class="styled-form article-form">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
 
         <div class="form-group <?php echo isset($form_validation_errors['title']) ? 'has-error' : ''; ?>">

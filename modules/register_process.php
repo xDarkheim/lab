@@ -4,32 +4,35 @@ require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 use App\Lib\Database;
 use App\Lib\Auth;
+use App\Lib\FlashMessageService;
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: /index.php?page=register");
-    exit();
-}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $database_handler = new Database();
+    $auth = new Auth($database_handler);
+    $flashMessageService = new FlashMessageService();
 
-// Use the specific CSRF token for registration
-if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token_register']) || !hash_equals($_SESSION['csrf_token_register'], $_POST['csrf_token'])) {
-    $_SESSION['errors'] = ['Invalid CSRF token. Please refresh the page and try again.'];
-    header("Location: /index.php?page=register");
-    exit();
-}
+    $username = $_POST['username'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $password_confirm = $_POST['password_confirm'] ?? '';
 
-$database_handler = new Database();
-$auth = new Auth($database_handler);
+    $result = $auth->register($username, $email, $password, $password_confirm);
 
-$result = $auth->register($_POST);
-
-if($result['success']) {
-    $_SESSION['success_message'] = $result['message'];
-    unset($_SESSION['csrf_token_register']); // Clear token on success
-    header("Location: /index.php?page=login&registration=success"); // Redirect to login after successful registration
-    exit();
+    if ($result['success']) {
+        $flashMessageService->addSuccess($result['message'] ?? 'Registration successful! You can now log in.');
+        header("Location: /index.php?page=login");
+        exit();
+    } else {
+        if (!empty($result['errors'])) {
+            foreach ($result['errors'] as $error) {
+                $flashMessageService->addError($error);
+            }
+        }
+        $_SESSION['form_data'] = $result['data'] ?? ['username' => $username, 'email' => $email];
+        header("Location: /index.php?page=register");
+        exit();
+    }
 } else {
-    $_SESSION['errors'] = $result['errors'];
-    $_SESSION['form_data'] = $result['data'] ?? ['username' => $_POST['username'], 'email' => $_POST['email'] ?? ''];
     header("Location: /index.php?page=register");
     exit();
 }

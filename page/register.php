@@ -23,6 +23,14 @@ if (empty($csrf_token)) {
 <div class="auth-page-container auth-layout-split">
     <div class="auth-layout-column auth-layout-column-info">
         <h1 class="page-title auth-page-main-title">Create Your Account</h1>
+        <div class="auth-info-content">
+            <p>Join our community to share your experiences, participate in discussions, and stay updated with the latest news.</p>
+            <ul>
+                <li>Engage with other users.</li>
+                <li>Customize your profile.</li>
+                <li>Contribute your own articles.</li>
+            </ul>
+        </div>
     </div>
     <div class="auth-layout-column auth-layout-column-form">
         <div class="auth-form-card">
@@ -95,6 +103,12 @@ if (empty($csrf_token)) {
             <div class="auth-form-footer">
                 <p>Already have an account? <a href="/index.php?page=login">Sign In</a></p>
             </div>
+        </div> 
+
+        <div class="auth-warning-message" style="margin-top: 20px;">
+            <p><strong>Important Security Notice:</strong></p>
+            <p>Choose a strong, unique password and never share it with anyone. Our administrators will <strong>never</strong> ask for your password. Keep your account secure.</p>
         </div>
+
     </div>
 </div>

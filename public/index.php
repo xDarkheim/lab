@@ -61,7 +61,7 @@ $template_data['page_messages'] = $final_page_messages;
 $navigationComponent = new NavigationComponent($page_key); 
 $template_data['main_navigation_html'] = $navigationComponent->render();
 
-$auth_pages_no_sidebar = ['login']; 
+$auth_pages_no_sidebar = ['login', 'register']; 
 
 if (in_array($page_key, $auth_pages_no_sidebar)) {
     $template_data['sidebar_user_panel_html'] = '';

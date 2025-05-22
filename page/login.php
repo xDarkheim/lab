@@ -66,15 +66,15 @@ unset($_SESSION['success_message']);
                 <?php endif; ?>
             </div>
             <div class="form-group form-checkbox-group">
-                <!-- <input type="checkbox" id="login_remember_me" name="remember_me" value="1" <?php echo $submitted_remember_me ? 'checked' : ''; ?>>
-                <label for="login_remember_me">Remember me</label> -->
+                <input type="checkbox" id="login_remember_me" name="remember_me" value="1" <?php echo $submitted_remember_me ? 'checked' : ''; ?>>
+                <label for="login_remember_me">Remember me</label>
             </div>
             <div class="form-actions">
                 <button type="submit" class="button button-primary button-block">Login</button>
             </div>
         </form>
         <div class="auth-form-footer">
-            <!-- <p><a href="/index.php?page=forgot_password">Forgot your password?</a></p> -->
+            <p><a href="/index.php?page=forgot_password">Forgot your password?</a></p>
             <p>Don't have an account? <a href="/index.php?page=register">Register here</a></p>
         </div>
         

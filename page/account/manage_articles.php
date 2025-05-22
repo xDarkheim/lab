@@ -67,22 +67,7 @@ if (!$database_handler->getConnection()) {
 <div class="page-container manage-articles-page">
     <div class="page-header">
         <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-        <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create New Article</a>
     </div>
-
-    <?php if (!empty($page_messages)): ?>
-        <?php foreach ($page_messages as $message): ?>
-            <div class="messages <?php echo htmlspecialchars($message['type']); ?>">
-                <p><?php echo htmlspecialchars($message['text']); ?></p>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-
-    <?php if ($db_connection_error && empty($page_messages)): ?>
-        <div class="messages error">
-            <p>Failed to connect to the database. Article list cannot be loaded.</p>
-        </div>
-    <?php endif; ?>
 
     <?php if (!$db_connection_error && empty($articles_view_data)): ?>
         <div class="message message--info message--empty-state">

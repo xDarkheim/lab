@@ -508,12 +508,12 @@ img {
 
 /* Layout: Main Content */
 .main-content {
+    max-width: 100vh; /* Full width of the remaining space */
     flex-grow: 1;
     background-color: var(--color-surface);
     padding: var(--spacing-4); /* Internal padding for the panel */
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
-    min-width: 860px;
 }
 
 /* Container for authentication pages */

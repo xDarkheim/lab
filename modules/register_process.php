@@ -16,7 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $password_confirm = $_POST['password_confirm'] ?? '';
 
-    $result = $auth->register($username, $email, $password, $password_confirm);
+    $registrationData = [
+        'username' => $username,
+        'email' => $email,
+        'password' => $password,
+        'password_confirm' => $password_confirm
+    ];
+    $result = $auth->register($registrationData);
 
     if ($result['success']) {
         $flashMessageService->addSuccess($result['message'] ?? 'Registration successful! You can now log in.');

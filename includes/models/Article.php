@@ -14,7 +14,8 @@ class Article {
         public string $date,
         public ?int $user_id,
         public ?string $created_at = null,
-        public ?string $updated_at = null
+        public ?string $updated_at = null,
+        public ?string $author_name = null // Added author_name property
     ) {}
 
     public static function findById(Database $db_handler, int $id): ?Article {
@@ -25,23 +26,28 @@ class Article {
         }
 
         try {
-            $stmt = $conn->prepare("SELECT id, title, short_description, full_text, date, user_id, created_at, updated_at FROM articles WHERE id = :id");
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $sql = "SELECT a.*, u.username AS author_name 
+                    FROM articles a 
+                    LEFT JOIN users u ON a.user_id = u.id 
+                    WHERE a.id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
-            
-            $articleData = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($articleData) {
-                return new self(
-                    (int)$articleData['id'],
-                    $articleData['title'],
-                    $articleData['short_description'],
-                    $articleData['full_text'],
-                    $articleData['date'],
-                    isset($articleData['user_id']) ? (int)$articleData['user_id'] : null,
-                    $articleData['created_at'],
-                    $articleData['updated_at']
+            if ($result) {
+                $article = new self(
+                    (int)$result['id'],
+                    $result['title'],
+                    $result['short_description'],
+                    $result['full_text'],
+                    $result['date'],
+                    isset($result['user_id']) ? (int)$result['user_id'] : null,
+                    $result['created_at'],
+                    $result['updated_at'],
+                    $result['author_name'] ?? null // Assign author_name if available
                 );
+                return $article;
             }
         } catch (PDOException $e) {
             error_log("Article::findById - PDOException: " . $e->getMessage());

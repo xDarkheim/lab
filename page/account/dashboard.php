@@ -106,15 +106,15 @@ if (!$userData) {
     <h3 class="dashboard-section-title">Quick Actions</h3>
     <ul class="dashboard-actions">
         <li>
-            <a href="/index.php?page=manage_articles">
-                Manage My Articles
-                <span class="action-status">(View, Edit, Delete your blog posts)</span>
-            </a>
-        </li>
-        <li>
             <a href="/index.php?page=create_article">
                 Create New Article
                 <span class="action-status">(Write & Publish a new blog post)</span>
+            </a>
+        </li>
+        <li>
+            <a href="/index.php?page=manage_articles">
+                Manage My Articles
+                <span class="action-status">(View, Edit, Delete your blog posts)</span>
             </a>
         </li>
         <li>
@@ -129,5 +129,21 @@ if (!$userData) {
                 <span class="action-status">(Change password, email preferences)</span>
             </a>
         </li>
+        <?php 
+        // Additional actions for admin users
+        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+        <li>
+            <a href="/index.php?page=site_settings">
+                Site Settings
+                <span class="action-status">(Manage global website settings)</span>
+            </a>
+        </li>
+        <li>
+            <a href="/index.php?page=manage_users">
+                Manage Users
+                <span class="action-status">(View and manage user accounts)</span>
+            </a>
+        </li>
+        <?php endif; ?>
     </ul>
 </div>

@@ -23,6 +23,8 @@
     --color-headings: #e0e0e0; /* Brighter off-white for headings */
     --color-text-on-primary: var(--color-primary-contrast);
     --color-text-on-accent: var(--color-primary-contrast);
+    --color-text-secondary: #a0a8b3; /* Slightly more muted than main text, for less emphasis */
+
 
     --color-border: #3a3f4b; /* Dark, subtle border */
     --color-border-light: #4a4f5b; /* Slightly lighter border */
@@ -32,7 +34,7 @@
     --color-success: #4CAF50; /* Green for success - vibrant on dark */
     --color-danger: #f44336;  /* Red for errors - vibrant on dark */
     --color-warning: #FFC107; /* Amber/Yellowish */
-    --color-warning-dark: #FFA000; 
+    --color-warning-dark: #FFA000;
     --color-info: #2196F3;    /* Blue for information - vibrant on dark */
 
     --color-success-rgb: 76, 175, 80;
@@ -43,6 +45,8 @@
     --color-background-rgb: 16, 18, 24;
     --color-surface-rgb: 26, 29, 36;
     --color-surface-accent-rgb: 37, 41, 48;
+    --color-primary-contrast-rgb: 255, 255, 255;
+
 
     --color-secondary: #4b5563; /* Neutral dark grey for secondary elements */
     --color-secondary-dark: #374151;
@@ -62,6 +66,7 @@
     --shadow-inner: inset 0 2px 4px 0 rgba(0,0,0,0.1);
     --shadow-outline: 0 0 0 3px rgba(var(--color-primary-rgb), 0.4);
 
+    --spacing-0: 0.125rem; /* 2px - New smaller spacing */
     --spacing-1: 0.25rem; /* 4px */
     --spacing-2: 0.5rem;  /* 8px */
     --spacing-3: 1rem;    /* 16px */
@@ -73,7 +78,67 @@
     --transition-duration: 0.2s; /* Slightly faster for a snappier feel */
     --transition-duration-long: 0.4s;
     --transition-timing-function: ease-in-out;
+
+    /* Font sizes */
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-md: 1rem;       /* 16px (base) */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-xxl: 1.5rem;   /* 24px */
+    --font-size-xxxl: 2rem;    /* 32px */
+
+
+    /* Font weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* Input specific variables (can be overridden by form styles) */
+    --input-padding-y: var(--spacing-2);
+    --input-padding-x: var(--spacing-2);
+    --input-font-size: 0.95rem;
+    --input-font-weight: 400;
+    --input-line-height: 1.5;
+    --input-color: var(--color-text);
+    --input-bg: var(--color-surface-accent);
+    --input-border-color: var(--color-border);
+    --input-border-radius: var(--border-radius-sm);
+    --input-focus-color: var(--color-text);
+    --input-focus-bg: var(--color-surface-accent);
+    --input-focus-border-color: var(--color-border-focus);
+    --input-placeholder-color: var(--color-text-muted);
+
+    /* Button specific variables */
+    --button-padding-y: var(--spacing-2);
+    --button-padding-x: var(--spacing-3);
+    --button-padding-y-sm: var(--spacing-1);
+    --button-padding-x-sm: var(--spacing-2);
+    --button-padding-y-lg: var(--spacing-3);
+    --button-padding-x-lg: var(--spacing-4);
+    --button-font-size: 0.95rem;
+    --button-font-weight: 600;
+    --button-line-height: 1.5;
+    --button-border-radius: var(--border-radius-sm);
+    --button-text: var(--color-primary-contrast); /* Default button text color */
+
+    /* Other theme specific variables */
+    --color-primary-ultralight: rgba(var(--color-primary-rgb), 0.05); /* Very light primary for backgrounds */
+    --color-primary-lighter: rgba(var(--color-primary-rgb), 0.15); /* Lighter primary for subtle highlights */
+    --color-surface-header: var(--color-surface); /* Table header, etc. */
+    --color-headings-table: var(--color-headings);
+    --color-surface-zebra: rgba(var(--color-surface-accent-rgb), 0.3); /* For striped tables */
+    --color-surface-hover: rgba(var(--color-primary-rgb), 0.075);
+    --color-surface-disabled: var(--color-secondary-dark);
+    --color-text-disabled: var(--color-text-muted);
+    --color-border-disabled: var(--color-secondary-dark);
+    --color-surface-code: var(--color-background); /* Background for code blocks */
+    --color-text-main: var(--color-text); /* Alias for main text color */
 }
+
 
 /* Base styles */
 *, *::before, *::after {
@@ -309,10 +374,7 @@ img {
 .sidebar {
     width: 300px; /* Fixed width for sidebar */
     flex-shrink: 0; /* Prevent sidebar from shrinking */
-    /* background-color: var(--color-surface); */ /* Widgets will have their own bg */
-    /* padding: var(--spacing-4); */
-    /* border-radius: var(--border-radius-lg); */
-    /* box-shadow: var(--shadow-md); */
+    padding: 20px;
 }
 
 .sidebar > div { /* Spacing between widgets in sidebar */
@@ -325,7 +387,6 @@ img {
     color: var(--color-text);
     border: 1px solid var(--color-border); /* Use global border color */
     box-shadow: var(--shadow-md); /* Use global shadow */
-    /* Other styles for .darkheim-widget from previous step should adapt or be reviewed */
 }
 
 .sidebar .darkheim-widget .user-widget__avatar {
@@ -419,8 +480,8 @@ img {
     color: var(--color-headings);
 }
 
-.user-widget.darkheim-widget .user-widget__nav ul, /* Ensure ul is targeted if present */
-.user-widget.darkheim-widget .user-widget__nav { /* Or nav directly if ul is removed */
+.user-widget.darkheim-widget .user-widget__nav ul,
+.user-widget.darkheim-widget .user-widget__nav {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -463,12 +524,7 @@ img {
     gap: var(--spacing-2); /* Reduced gap for a tighter form */
 }
 
-/* .form-group, .form-control, .button, .button-primary, .button-block
-   are already defined globally. The login widget will inherit these. */
-
 .login-widget.darkheim-widget .register-prompt {
-    /* text-align: center; already in inline style, can be moved to CSS */
-    /* margin-top: var(--spacing-3); already in inline style */
     font-size: 0.9em;
     color: var(--color-text-muted);
 }
@@ -485,26 +541,40 @@ img {
 }
 
 /* Quick Links Widget (if in sidebar) */
-.quick-links-widget__list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.quick-links-widget__list li {
-    margin-bottom: var(--spacing-1);
-}
-.quick-links-widget__list a {
-    color: var(--color-primary-light);
-    text-decoration: none;
-    display: block;
-    padding: var(--spacing-1) 0;
-    transition: color var(--transition-duration) ease, padding-left var(--transition-duration) ease;
-}
-.quick-links-widget__list a:hover {
-    color: var(--color-primary);
-    padding-left: var(--spacing-1);
+.quick-links-widget {
+    margin-top: 20px; /* Top margin for the "Site Management" block */
+    padding-top: 15px; /* Top padding */
+    border-top: 1px solid var(--color-border-light); /* Top separator line, if needed */
 }
 
+.quick-links-widget .widget-title { /* Styles for "Site Management" title */
+    margin-bottom: 0.5em; /* Bottom margin from title to list */
+    font-size: 1.1em; /* Slightly increase title font size */
+    color: var(--color-headings);
+}
+
+.quick-links-list {
+    list-style-type: none; /* Removes list markers */
+    padding-left: 0;      /* Removes left padding added for markers */
+    margin-top: 0.5em;    /* Small top margin from title */
+}
+
+.quick-links-list li a {
+    display: block; /* Make link span full width of li for easier clicking */
+    padding: 8px 0; /* Vertical padding for links */
+    text-decoration: none;
+    color: var(--color-primary-light);
+}
+.quick-links-list li a:hover {
+    color: var(--color-primary);
+}
+
+/* Styles for user-account-widget, if a separator or bottom margin is needed */
+.user-account-widget {
+    padding-bottom: 15px; /* Bottom padding */
+    margin-bottom: 20px; /* Bottom margin to the next block */
+    border-bottom: 1px solid var(--color-border-light); /* Bottom separator line, if needed */
+}
 
 /* Layout: Main Content */
 .main-content {
@@ -521,13 +591,13 @@ img {
     max-width: 1100px; /* Overall maximum page width */
     margin: var(--spacing-4) auto; /* Centering and vertical margins */
     padding: var(--spacing-4);
-    box-sizing: border-box; /* Added just in case */
+    box-sizing: border-box;
 }
 
 /* New layout with two columns */
 .auth-layout-split {
-    display: flex !important; /* Temporarily add !important for testing */
-    flex-wrap: nowrap !important; /* Temporarily remove wrapping for testing */
+    display: flex !important;
+    flex-wrap: nowrap !important;
     gap: var(--spacing-5); /* Space between columns */
     align-items: flex-start; /* Align to the top if columns have different heights */
 }
@@ -561,7 +631,7 @@ img {
 .auth-layout-column-info .page-title,
 .auth-layout-column-info .auth-page-main-title { /* Adding specificity */
     text-align: left; /* Align to the left for the info column */
-    margin-top: 0; 
+    margin-top: 0;
     margin-bottom: var(--spacing-4); /* Space below the title */
 }
 
@@ -688,27 +758,27 @@ img {
    Authentication Pages
    ========================================================================== */
 .auth-form-panel {
-    max-width: 720px; 
-    margin: 0 auto;   
+    max-width: 720px;
+    margin: 0 auto;
 }
 
-.auth-page-main-title.page-title, 
-.auth-page-container > .page-title { 
+.auth-page-main-title.page-title,
+.auth-page-container > .page-title {
     text-align: center;
-    margin-top: 0; 
-    margin-bottom: var(--spacing-3); 
+    margin-top: 0;
+    margin-bottom: var(--spacing-3);
     width: 100%;
     display: block;
 }
 
 /* Warning Message on Auth Pages */
 .auth-warning-message {
-    max-width: 600px; 
-    margin: 0 auto var(--spacing-4) auto; 
+    max-width: 600px;
+    margin: 0 auto var(--spacing-4) auto;
     padding: var(--spacing-3);
-    background-color: rgba(var(--color-warning-rgb, 255, 193, 7), 0.1); 
-    border: 1px solid var(--color-warning, #FFC107); 
-    border-left-width: 5px; 
+    background-color: rgba(var(--color-warning-rgb, 255, 193, 7), 0.1);
+    border: 1px solid var(--color-warning, #FFC107);
+    border-left-width: 5px;
     border-radius: var(--border-radius-md);
     color: var(--color-text);
     width: 100%;
@@ -718,37 +788,47 @@ img {
 
 /* Layout: Site Footer */
 .site-footer {
-    background-color: var(--color-surface-accent); /* Slightly different dark for footer */
-    color: var(--color-text-muted);
-    padding: var(--spacing-4) var(--spacing-4);
+    background-color: var(--color-surface); /* White background */
+    color: var(--color-text-muted); /* Muted text color */
+    padding: var(--spacing-3) 0;
     text-align: center;
-    border-top: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--color-border); /* Subtle border */
     margin-top: auto; /* Pushes footer to bottom if content is short */
 }
 
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 var(--spacing-2);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-2);
+}
+
+.footer-content p {
+    margin: 0 0 var(--spacing-1) 0;
 }
 
 .footer-nav {
+    margin-top: 10px;
     display: flex;
     gap: var(--spacing-3);
 }
 
 .footer-nav a {
-    color: var(--color-text-muted);
+    color: var(--color-primary);
     text-decoration: none;
+    margin: 0 var(--spacing-1);
+    transition: color 0.3s ease;
 }
 
-.footer-nav a:hover {
-    color: var(--color-primary-light);
+.footer-nav a:hover,
+.footer-nav a:focus {
+    color: var(--color-primary-dark);
     text-decoration: underline;
 }
+
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 992px) { /* Tablet and below */
@@ -821,8 +901,8 @@ input[type="reset"],
 input[type="button"] {
     display: inline-block;
     font-family: var(--font-primary);
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: var(--button-font-weight);
+    font-size: var(--button-font-size);
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
@@ -830,14 +910,14 @@ input[type="button"] {
     cursor: pointer;
     user-select: none;
     border: 1px solid transparent; /* Base border */
-    padding: var(--spacing-2) var(--spacing-3);
-    border-radius: var(--border-radius-sm);
+    padding: var(--button-padding-y) var(--button-padding-x);
+    border-radius: var(--button-border-radius);
     transition: color var(--transition-duration) var(--transition-timing-function),
                 background-color var(--transition-duration) var(--transition-timing-function),
                 border-color var(--transition-duration) var(--transition-timing-function),
                 box-shadow var(--transition-duration) var(--transition-timing-function),
                 opacity var(--transition-duration) var(--transition-timing-function);
-    line-height: 1.5; /* Ensure consistent height */
+    line-height: var(--button-line-height); /* Ensure consistent height */
 }
 
 /* Primary Button */
@@ -845,7 +925,7 @@ input[type="button"] {
 button.button-primary, /* For <button class="button button-primary"> */
 input[type="submit"] { /* Default submit buttons are primary */
     background-color: var(--color-primary);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
     border-color: var(--color-primary);
 }
 .button-primary:hover,
@@ -853,7 +933,7 @@ button.button-primary:hover,
 input[type="submit"]:hover {
     background-color: var(--color-primary-dark);
     border-color: var(--color-primary-dark);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
     opacity: 1;
 }
 .button-primary:focus,
@@ -867,14 +947,14 @@ input[type="submit"]:focus {
 .button-secondary,
 button.button-secondary {
     background-color: var(--color-secondary);
-    color: var(--color-primary-contrast); /* Assuming secondary is dark enough for light text */
+    color: var(--color-button-text);
     border-color: var(--color-secondary);
 }
 .button-secondary:hover,
 button.button-secondary:hover {
     background-color: var(--color-secondary-dark);
     border-color: var(--color-secondary-dark);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
     opacity: 1;
 }
 .button-secondary:focus,
@@ -891,7 +971,7 @@ button.button-secondary:focus {
 }
 .button-outline:hover {
     background-color: var(--color-primary);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
     border-color: var(--color-primary);
     opacity: 1;
 }
@@ -899,24 +979,24 @@ button.button-secondary:focus {
 /* Danger Button */
 .button-danger {
     background-color: var(--color-danger);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
     border-color: var(--color-danger);
 }
 .button-danger:hover {
     background-color: var(--color-danger); /* Darken or adjust as needed */
     opacity: var(--hover-opacity);
     border-color: var(--color-danger);
-    color: var(--color-primary-contrast);
+    color: var(--color-button-text);
 }
 
 /* Button Sizes */
 .button-small {
     font-size: 0.8rem;
-    padding: var(--spacing-1) var(--spacing-2);
+    padding: var(--button-padding-y-sm) var(--button-padding-x-sm);
 }
 .button-large {
     font-size: 1.1rem;
-    padding: var(--spacing-3) var(--spacing-4);
+    padding: var(--button-padding-y-lg) var(--button-padding-x-lg);
 }
 
 /* Block Button */
@@ -972,16 +1052,16 @@ textarea,
 select {
     display: block;
     width: 100%;
-    padding: var(--spacing-2) var(--spacing-2);
+    padding: var(--input-padding-y) var(--input-padding-x);
     font-family: var(--font-primary);
-    font-size: 0.95rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-text);
-    background-color: var(--color-surface-accent);
+    font-size: var(--input-font-size);
+    font-weight: var(--input-font-weight);
+    line-height: var(--input-line-height);
+    color: var(--input-color);
+    background-color: var(--input-bg);
     background-clip: padding-box;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--input-border-color);
+    border-radius: var(--input-border-radius);
     transition: border-color var(--transition-duration) var(--transition-timing-function),
                 box-shadow var(--transition-duration) var(--transition-timing-function);
 }
@@ -1001,9 +1081,9 @@ input[type="time"]:focus,
 input[type="datetime-local"]:focus,
 textarea:focus,
 select:focus {
-    color: var(--color-text);
-    background-color: var(--color-surface-accent);
-    border-color: var(--color-border-focus);
+    color: var(--input-focus-color);
+    background-color: var(--input-focus-bg);
+    border-color: var(--input-focus-border-color);
     outline: 0;
     box-shadow: var(--shadow-outline);
 }
@@ -1018,7 +1098,6 @@ textarea[rows] { /* If rows attribute is present, let it define height */
 
 
 select.form-control {
-    /* Add custom arrow for select if desired, or leave as browser default */
     appearance: none; /* Remove default arrow for custom styling */
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c5c8c6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
@@ -1066,14 +1145,14 @@ input[type="checkbox"]:checked::before {
     content: '';
     display: block;
     position: absolute;
-    /* Корректируем пропорции и толщину для лучшей видимости */
-    width: 0.3em; /* Ширина короткой части галочки (было 0.65em) */
-    height: 0.6em; /* Высота длинной части галочки (было 0.35em) */
-    border: solid var(--color-primary-contrast); /* Цвет галочки (белый) */
-    border-width: 0 0.2em 0.2em 0; /* Толщина линий: нет верхней, правая, нижняя, нет левой (было 0.15em) */
+    /* Adjust proportions and thickness for better visibility */
+    width: 0.3em; /* Width of the short part of the checkmark */
+    height: 0.6em; /* Height of the long part of the checkmark */
+    border: solid var(--color-primary-contrast); /* Checkmark color (white) */
+    border-width: 0 0.2em 0.2em 0; /* Line thickness: no top, right, bottom, no left */
     transform: rotate(45deg) translate(-50%, -50%);
     left: 50%;
-    top: 42%; /* Слегка корректируем позицию по вертикали для визуального центра (было 45%) */
+    top: 42%; /* Slightly adjust vertical position for visual center */
 }
 
 input[type="radio"]:checked::before {
@@ -1209,8 +1288,6 @@ select.is-valid:focus {
 .styled-form {
     background-color: var(--color-surface); /* Can be same as .main-content or slightly different */
     padding: var(--spacing-4);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
 }
 .auth-form-container .styled-form { /* Example for login/register pages */
     max-width: 450px;
@@ -1242,15 +1319,9 @@ select.is-valid:focus {
     background-color: rgba(var(--color-primary-rgb), 0.1); /* Subtle hover effect using primary color */
 }
 
-/* Ensure global custom checkbox styles apply. This selector just adds margin. */
 .checkbox-item input[type="checkbox"] {
     margin-right: var(--spacing-2);
     flex-shrink: 0; /* Prevent checkbox from shrinking if label is long */
-    /* The appearance (checkmark, size, etc.) should come from global styles:
-       input[type="checkbox"] { ... } in your style.css around line 900+
-       If those global styles are not applying as expected, ensure their specificity
-       or copy relevant parts here, but ideally, rely on the global ones.
-    */
 }
 
 .checkbox-item label {
@@ -1320,19 +1391,6 @@ select.is-valid:focus {
     border-color: var(--color-info);
     color: var(--color-info);
 }
-
-/* Optional: Add icons to messages */
-/* .message::before {
-    font-family: "Your Icon Font"; // Replace with your icon font if you use one
-    font-size: 1.5em;
-    line-height: 1;
-    margin-right: var(--spacing-2);
-}
-.message--success::before { content: "\f058"; color: var(--color-success); } // Example FontAwesome check-circle
-.message--error::before { content: "\f071"; color: var(--color-danger); } // Example FontAwesome exclamation-triangle
-.message--warning::before { content: "\f06a"; color: var(--color-warning); } // Example FontAwesome exclamation-circle
-.message--info::before { content: "\f05a"; color: var(--color-info); } // Example FontAwesome info-circle
-*/
 
 /* Full width message variant */
 .full-width-message {
@@ -1409,7 +1467,6 @@ select.is-valid:focus {
     color: var(--color-text);
 }
 
-/* NEW STYLES FOR CATEGORY DISPLAY */
 .article-categories-display {
     font-size: var(--font-size-sm, 0.9rem); /* Consistent with other meta */
     color: var(--color-text-muted); /* Consistent with other meta */
@@ -1520,61 +1577,124 @@ select.is-valid:focus {
     align-self: flex-start; /* Align button to the left */
 }
 
-/* Comments Section */
+/* ==========================================================================
+   Comments Section
+   ========================================================================== */
 .comments-section {
     margin-top: var(--spacing-5);
     padding-top: var(--spacing-4);
     border-top: 1px solid var(--color-border-extralight);
 }
-.comments-section-title { /* Typically an H2 or H3 */
+
+.comments-section-title {
+    font-size: var(--font-size-xl, 1.75rem);
+    color: var(--color-headings);
     margin-top: 0;
     margin-bottom: var(--spacing-4);
 }
+
 .comments-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-3);
 }
+
 .comment-item {
     background-color: var(--color-surface-accent);
     padding: var(--spacing-3);
     border-radius: var(--border-radius-md);
     border: 1px solid var(--color-border);
 }
+
 .comment-author {
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold, 600);
     color: var(--color-headings);
     margin-bottom: var(--spacing-1);
-    font-size: 0.95rem;
+    font-size: var(--font-size-md, 1rem);
 }
+
 .comment-author .comment-date {
-    font-size: 0.8rem;
+    font-size: var(--font-size-xs, 0.8rem);
     color: var(--color-text-muted);
-    font-weight: 400;
+    font-weight: var(--font-weight-normal, 400);
+    margin-left: var(--spacing-1);
 }
+
 .comment-content {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm, 0.9rem);
     line-height: 1.6;
+    color: var(--color-text);
+    white-space: pre-wrap;
 }
 .comment-content p:last-child {
     margin-bottom: 0;
 }
-.comment-form {
-    margin-top: var(--spacing-4);
-}
+
+/* For "no comments" or "login to comment" messages in a styled box */
 .no-comments-message,
-.login-prompt { /* For "no comments" or "login to comment" */
+.login-prompt-message {
     color: var(--color-text-muted);
     font-style: italic;
     padding: var(--spacing-3);
     background-color: var(--color-surface-accent);
+    border: 1px dashed var(--color-border-light);
     border-radius: var(--border-radius-md);
     text-align: center;
+    margin-top: var(--spacing-3);
+    margin-bottom: var(--spacing-3);
 }
+.login-prompt-message a {
+    color: var(--color-primary-light);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+}
+.login-prompt-message a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* For a simpler text-based login prompt */
+.login-prompt {
+    margin-top: var(--spacing-4);
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+}
+.login-prompt a {
+    color: var(--color-primary-light);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+}
+.login-prompt a:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.comment-form {
+    margin-top: var(--spacing-4);
+    padding: var(--spacing-4);
+    background-color: var(--color-surface-accent);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--color-border);
+}
+.comment-form .form-label {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-2);
+}
+.comment-form textarea.form-control {
+    min-height: 100px;
+}
+.comment-form .form-actions,
+.comment-form .button {
+    margin-top: var(--spacing-3);
+}
+
 
 /* Dashboard Specifics (Example) */
 .dashboard-container {
-    min-width: 690px; /* Ensure it doesn't get too narrow */
+    min-width: 800px; /* Ensure it doesn't get too narrow */
 }
 .dashboard-welcome-message {
     font-size: 1.2rem;
@@ -1713,8 +1833,8 @@ select.is-valid:focus {
     font-weight: var(--font-weight-semibold, 600); /* Make the title a bit bolder */
     box-shadow: var(--shadow-sm); /* Softer initial shadow for a cleaner look */
     border: 1px solid var(--color-border-light, transparent); /* Subtle or transparent initial border */
-    transition: transform 0.15s ease-out, 
-                box-shadow 0.15s ease-out, 
+    transition: transform 0.15s ease-out,
+                box-shadow 0.15s ease-out,
                 background-color 0.15s ease-out,
                 border-color 0.15s ease-out,
                 color 0.15s ease-out;
@@ -1928,14 +2048,14 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .category-tag-small {
-    font-size: 0.75rem; /* Using a fixed value as --font-size-xs is not defined */
-    padding: 0 var(--spacing-1); /* Use 0 for top/bottom padding */
-    color: var(--color-primary-contrast); 
-    background-color: var(--color-primary); 
-    border-radius: var(--border-radius-sm); /* Using --border-radius-sm */
+    font-size: 0.75rem;
+    padding: 0 var(--spacing-1);
+    color: var(--color-primary-contrast);
+    background-color: var(--color-primary);
+    border-radius: var(--border-radius-sm);
     text-decoration: none;
     font-weight: var(--font-weight-normal);
-    border: 1px solid var(--color-primary-dark); 
+    border: 1px solid var(--color-primary-dark);
     display: inline-block;
     margin: 2px; /* Small margin between tags */
     line-height: 1.4;
@@ -1943,14 +2063,14 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .category-tag-small:hover {
-    color: var(--color-primary-contrast); /* Use defined variable for white */
-    background-color: var(--color-primary-dark); 
+    color: var(--color-primary-contrast);
+    background-color: var(--color-primary-dark);
     border-color: var(--color-primary-light);
     text-decoration: none;
 }
 
 .text-muted-small {
-    font-size: var(--font-size-sm, 0.875rem); 
+    font-size: var(--font-size-sm, 0.875rem);
     color: var(--color-text-muted);
 }
 
@@ -2054,26 +2174,25 @@ hr.section-divider { /* For <hr> between settings sections */
 /* --- News Page Styles --- */
 
 .news-page-container {
-    max-width: 900px; /* Оптимальная ширина для чтения статей */
-    margin: var(--spacing-3) auto var(--spacing-5) auto; /* Уменьшен верхний отступ, нижний оставлен прежним */
+    max-width: 900px; /* Optimal width for reading articles */
+    margin: var(--spacing-3) auto var(--spacing-5) auto; /* Reduced top margin, bottom margin remains the same */
     padding: var(--spacing-4);
 }
 
 .news-page-container .page-title {
-    /* Стили для .page-title уже должны быть */
     text-align: center;
     margin-bottom: var(--spacing-5);
 }
 
 /* --- Single Article View --- */
 .single-article {
-    background-color: var(--color-surface, #fff); /* Фон для одиночной статьи */
+    background-color: var(--color-surface, #fff); /* Background for single article */
     padding: var(--spacing-5);
     margin-bottom: var(--spacing-5);
 }
 
 .single-article-title {
-    font-size: var(--font-size-xxxl, 2.8rem); /* Крупный заголовок для статьи */
+    font-size: var(--font-size-xxxl, 2.8rem); /* Large title for article */
     color: var(--color-headings);
     margin-top: 0;
     margin-bottom: var(--spacing-3);
@@ -2084,67 +2203,19 @@ hr.section-divider { /* For <hr> between settings sections */
 .news-page-container{
     min-width: 800px; /* Ensure it doesn't get too narrow */
 }
-.article-meta {
-    font-size: var(--font-size-sm, 0.9rem);
-    color: var(--color-text-muted);
-    margin-bottom: var(--spacing-4);
-    display: flex; /* Allow items to wrap and align nicely */
-    flex-wrap: wrap;
-    gap: var(--spacing-1) var(--spacing-3); /* row-gap column-gap */
-    align-items: center;
-}
-
-.article-meta p,
-.article-meta span,
-.article-meta .article-categories-display { /* Include category display here */
-    margin-bottom: 0; /* Remove bottom margin as gap handles spacing */
-    margin-right: 0; /* Remove right margin as gap handles spacing */
-}
-
-.article-meta .author-name {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text);
-}
-
-/* NEW STYLES FOR CATEGORY DISPLAY */
-.article-categories-display {
-    font-size: var(--font-size-sm, 0.9rem); /* Consistent with other meta */
-    color: var(--color-text-muted); /* Consistent with other meta */
-}
-
-.article-categories-display span { /* "Categories: " text */
-    margin-right: var(--spacing-1);
-    font-weight: var(--font-weight-normal); /* Keep it normal weight */
-}
-
-.category-tag {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: var(--font-weight-medium);
-    background-color: var(--color-primary-ultralight, #e9f2ff);
-    padding: var(--spacing-0) var(--spacing-1);
-    border-radius: var(--border-radius-sm);
-    border: 1px solid transparent; /* for hover effect consistency */
-    transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease, border-color var(--transition-duration) ease;
-}
-
-.category-tag:hover {
-    text-decoration: none; /* Often links in tags don't get underlined */
-    color: var(--color-primary-dark);
-    background-color: var(--color-primary-light, #d1e3ff);
-    border-color: var(--color-primary-lighter, #b8d4fe);
-}
+/* Article Meta and Category Display styles are already defined globally,
+   they will apply here as well. */
 
 .article-content {
-    font-size: var(--font-size-md, 1rem); 
-    line-height: 1.8; 
+    font-size: var(--font-size-md, 1rem);
+    line-height: 1.8;
     color: var(--color-text-main);
     margin-bottom: var(--spacing-5);
 }
 .article-content p {
     margin-bottom: var(--spacing-3);
 }
-.article-content h2, .article-content h3, .article-content h4 { 
+.article-content h2, .article-content h3, .article-content h4 {
     margin-top: var(--spacing-4);
     margin-bottom: var(--spacing-2);
     color: var(--color-headings);
@@ -2160,8 +2231,8 @@ hr.section-divider { /* For <hr> between settings sections */
     font-style: italic;
     color: var(--color-text-secondary);
 }
-.article-content pre { 
-    background-color: var(--color-surface-code, var(--color-background-alt));
+.article-content pre {
+    background-color: var(--color-surface-code, var(--color-background));
     padding: var(--spacing-3);
     border-radius: var(--border-radius-md);
     overflow-x: auto;
@@ -2171,7 +2242,7 @@ hr.section-divider { /* For <hr> between settings sections */
 
 /* --- Category Filter Section (News Page) --- */
 .category-filter-section {
-    background-color: var(--color-surface-accent, var(--color-background-alt)); /* Легкий фон для блока фильтра */
+    background-color: var(--color-surface-accent, var(--color-background)); /* Light background for the filter block */
     padding: var(--spacing-3) var(--spacing-4);
     border-radius: var(--border-radius-lg);
     margin-bottom: var(--spacing-5);
@@ -2197,7 +2268,7 @@ hr.section-divider { /* For <hr> between settings sections */
 .category-link {
     display: inline-block;
     padding: var(--spacing-2) var(--spacing-3);
-    background-color: var(--color-surface, #fff); 
+    background-color: var(--color-surface, #fff);
     color: var(--color-text);
     text-decoration: none;
     border-radius: var(--border-radius-md);
@@ -2214,12 +2285,12 @@ hr.section-divider { /* For <hr> between settings sections */
 
 .category-link.is-active {
     background-color: var(--color-primary);
-    color: var(--color-button-text, #fff); 
+    color: var(--color-button-text, #fff);
     border-color: var(--color-primary-dark, var(--color-primary));
     font-weight: var(--font-weight-semibold);
 }
 .category-link.is-active:hover {
-    background-color: var(--color-primary-dark); 
+    background-color: var(--color-primary-dark);
     color: var(--color-button-text, #fff);
 }
 
@@ -2227,11 +2298,11 @@ hr.section-divider { /* For <hr> between settings sections */
 /* --- News Feed View (List of Articles) --- */
 
 .news-feed-item {
-    background-color: var(--color-surface, #fff); 
+    background-color: var(--color-surface, #fff);
     padding: var(--spacing-4);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm); 
-    margin-bottom: var(--spacing-5); 
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-5);
     border: 1px solid var(--color-border-light, #eee);
 }
 .news-feed-item:last-child {
@@ -2239,7 +2310,7 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 .news-feed-item-title {
-    font-size: var(--font-size-xl, 1.8rem); 
+    font-size: var(--font-size-xl, 1.8rem);
     margin-top: 0;
     margin-bottom: var(--spacing-2);
 }
@@ -2268,93 +2339,13 @@ hr.section-divider { /* For <hr> between settings sections */
     align-self: flex-start;
 }
 
-
-/* --- Comments Section (applies to single article view) --- */
-.comments-section {
-    margin-top: var(--spacing-6);
-    padding-top: var(--spacing-4);
-    border-top: 1px solid var(--color-border, #ddd);
-}
-
-.comments-section-title {
-    font-size: var(--font-size-xl, 1.75rem);
-    color: var(--color-headings);
-    margin-bottom: var(--spacing-4);
-}
-
-.comments-list .comment-item {
-    background-color: var(--color-surface-accent, var(--color-background-alt));
-    padding: var(--spacing-3);
-    border-radius: var(--border-radius-md);
-    margin-bottom: var(--spacing-3);
-    border: 1px solid var(--color-border-light, #eee);
-}
-.comments-list .comment-item:last-child {
-    margin-bottom: 0;
-}
-
-.comment-author {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text);
-    margin-bottom: var(--spacing-1);
-    font-size: var(--font-size-md);
-}
-.comment-author .comment-date {
-    font-size: var(--font-size-xs, 0.8rem);
-    color: var(--color-text-muted);
-    font-weight: var(--font-weight-normal);
-}
-
-.comment-content {
-    font-size: var(--font-size-sm, 0.9rem);
-    line-height: 1.6;
-    color: var(--color-text-secondary);
-    white-space: pre-wrap;
-}
-.comment-content p:last-child {
-    margin-bottom: 0;
-}
-
-.no-comments-message {
-    font-style: italic;
-    color: var(--color-text-muted);
-    margin-bottom: var(--spacing-4);
-}
-
-.comment-form {
-    margin-top: var(--spacing-4);
-    padding: var(--spacing-4);
-    background-color: var(--color-surface-accent, var(--color-background-alt));
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--color-border-light, #eee);
-}
-.comment-form .form-label {
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--spacing-2);
-}
-.comment-form textarea.form-control {
-    min-height: 100px;
-}
-.comment-form .button {
-    margin-top: var(--spacing-3);
-}
-
-.login-prompt {
-    margin-top: var(--spacing-4);
-    font-size: var(--font-size-md);
-}
-.login-prompt a {
-    color: var(--color-primary);
-    font-weight: var(--font-weight-medium);
-}
-
-
+/* Account Settings Page */
 .account-settings-container h1 {
     margin-bottom: var(--spacing-5);
 }
 
-.settings-section {
-    background-color: var(--color-surface-accent, var(--color-background-alt)); /* Слегка другой фон для секции */
+.settings-section { /* This class is used in multiple contexts, ensure it's styled generally or specifically */
+    background-color: var(--color-surface-accent, var(--color-background));
     padding: var(--spacing-4);
     border-radius: var(--border-radius-lg);
     margin-bottom: var(--spacing-5);
@@ -2372,8 +2363,8 @@ hr.section-divider { /* For <hr> between settings sections */
 
 .setting-item {
     display: flex;
-    flex-wrap: wrap; 
-    gap: var(--spacing-3); 
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
     margin-bottom: var(--spacing-4);
     align-items: flex-start;
 }
@@ -2418,22 +2409,22 @@ hr.section-divider { /* For <hr> between settings sections */
 
 
 .account-settings-container .form-actions.setting-actions {
-    margin-top: var(--spacing-4); 
+    margin-top: var(--spacing-4);
     padding-top: var(--spacing-4);
     border-top: 1px solid var(--color-border-light, #eee);
 }
 
 .account-settings-container .page-actions {
     margin-top: var(--spacing-5);
-    text-align: center; 
+    text-align: center;
 }
 
 
 @media (max-width: 768px) {
     .setting-item {
-        flex-direction: column; 
+        flex-direction: column;
         gap: var(--spacing-2);
-        align-items: stretch; 
+        align-items: stretch;
     }
     .setting-label {
         flex-basis: auto;
@@ -2444,7 +2435,6 @@ hr.section-divider { /* For <hr> between settings sections */
         flex-basis: auto;
         min-width: auto;
     }
-
 }
 
 /* --- Manage Articles Page (Admin-like Table View) Styles --- */
@@ -2461,7 +2451,7 @@ hr.section-divider { /* For <hr> between settings sections */
     color: var(--color-headings, var(--color-primary));
     margin-top: 0;
     margin-bottom: var(--spacing-4);
-    text-align: center; /* Или left */
+    text-align: center; /* Or left */
 }
 
 .admin-actions-bar {
@@ -2469,13 +2459,13 @@ hr.section-divider { /* For <hr> between settings sections */
     padding-bottom: var(--spacing-4);
     border-bottom: 1px solid var(--color-border-light, #eee);
     display: flex;
-    justify-content: flex-end; 
+    justify-content: flex-end;
 }
 
 
 .admin-content-container .message {
     padding: var(--spacing-3) var(--spacing-4);
-    margin: var(--spacing-4) 0; 
+    margin: var(--spacing-4) 0;
     border-radius: var(--border-radius-md);
     border-width: 1px;
     border-style: solid;
@@ -2511,73 +2501,7 @@ hr.section-divider { /* For <hr> between settings sections */
     margin-bottom: var(--spacing-4);
 }
 
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--color-surface-accent, var(--color-background));
-    color: var(--color-text);
-    font-size: var(--font-size-sm, 0.9rem);
-}
-
-.styled-table th,
-.styled-table td {
-    padding: var(--spacing-3) var(--spacing-3);
-    text-align: left;
-    border-bottom: 1px solid var(--color-border, #dee2e6);
-    vertical-align: middle;
-}
-
-.styled-table thead th {
-    background-color: var(--color-surface-header, var(--color-primary-ultralight));
-    color: var(--color-headings-table, var(--color-primary-dark));
-    font-weight: var(--font-weight-semibold, 600);
-    border-bottom-width: 2px;
-    border-color: var(--color-primary, #007bff);
-    white-space: nowrap;
-}
-
-.styled-table tbody tr {
-    transition: background-color 0.15s ease-in-out;
-}
-
-.styled-table tbody tr:nth-of-type(even) {
-    background-color: var(--color-surface-zebra, rgba(0,0,0,0.02));
-}
-
-.styled-table tbody tr:hover {
-    background-color: var(--color-surface-hover, rgba(var(--color-primary-rgb), 0.075));
-}
-
-.styled-table td a {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: var(--font-weight-medium);
-}
-.styled-table td a:hover {
-    text-decoration: underline;
-    color: var(--color-primary-dark);
-}
-
-.styled-table .actions-cell {
-    white-space: nowrap; 
-    min-width: 160px; 
-}
-
-.styled-table .actions-cell .button {
-    margin-right: var(--spacing-2);
-    margin-bottom: var(--spacing-1); 
-    padding: var(--button-padding-y-sm, 0.25rem) var(--button-padding-x-sm, 0.5rem);
-    font-size: var(--font-size-xs, 0.8rem);
-}
-.styled-table .actions-cell .button:last-child {
-    margin-right: 0;
-}
-
-.styled-table .actions-cell form {
-    display: inline-block; 
-    margin: 0;
-}
-
+/* .styled-table styles are already defined globally and should apply here */
 
 
 @media (max-width: 768px) {
@@ -2585,22 +2509,9 @@ hr.section-divider { /* For <hr> between settings sections */
         font-size: var(--font-size-xl, 2rem);
     }
     .admin-actions-bar {
-        justify-content: center; 
+        justify-content: center;
     }
-    .styled-table th,
-    .styled-table td {
-        padding: var(--spacing-2);
-        font-size: var(--font-size-xs, 0.85rem);
-    }
-    .styled-table .actions-cell .button {
-        display: block; 
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: var(--spacing-2);
-    }
-    .styled-table .actions-cell .button:last-child {
-        margin-bottom: 0;
-    }
+    /* .styled-table th, .styled-table td responsiveness is already handled globally */
 }
 
 /* --- Create/Edit Article Form Page Styles --- */
@@ -2642,33 +2553,24 @@ hr.section-divider { /* For <hr> between settings sections */
     margin: 0;
     flex-grow: 1;
 }
-/* Icons for messages (example, can use SVG or font icons) */
-.form-page-container .messages::before {
-    /* content: ''; */
-    margin-right: var(--spacing-2);
-    font-size: 1.2em;
-}
 
 .form-page-container .messages.success {
     background-color: rgba(var(--color-success-rgb, 25, 135, 84), 0.1);
     border-color: var(--color-success, #198754);
     color: var(--color-success-dark, #12613c);
 }
-/* .form-page-container .messages.success::before { content: '✔'; } */
 
 .form-page-container .messages.error {
     background-color: rgba(var(--color-danger-rgb, 220, 53, 69), 0.1);
     border-color: var(--color-danger, #dc3545);
     color: var(--color-danger-dark, #a32835);
 }
-/* .form-page-container .messages.error::before { content: '✖'; } */
 
 .form-page-container .messages.info {
     background-color: rgba(var(--color-info-rgb, 13, 202, 240), 0.1);
     border-color: var(--color-info, #0dcaf0);
     color: var(--color-info-dark, #087990);
 }
-/* .form-page-container .messages.info::before { content: 'ℹ'; } */
 
 
 /* Styles for form field groups */
@@ -2690,29 +2592,7 @@ hr.section-divider { /* For <hr> between settings sections */
     font-weight: var(--font-weight-normal);
 }
 
-.form-page-container .form-control {
-    display: block;
-    width: 100%;
-    padding: var(--input-padding-y, 0.75rem) var(--input-padding-x, 1rem);
-    font-size: var(--input-font-size, 1rem);
-    font-weight: var(--input-font-weight, 400);
-    line-height: var(--input-line-height, 1.5);
-    color: var(--input-color, var(--color-text));
-    background-color: var(--input-bg, var(--color-background-alt));
-    background-clip: padding-box;
-    border: 1px solid var(--input-border-color, var(--color-border));
-    appearance: none;
-    border-radius: var(--input-border-radius, var(--border-radius-md));
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-page-container .form-control:focus {
-    color: var(--input-focus-color, var(--color-text));
-    background-color: var(--input-focus-bg, var(--color-background-alt));
-    border-color: var(--input-focus-border-color, var(--color-primary));
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(var(--color-primary-rgb, 78, 115, 223), 0.25);
-}
+/* .form-control styles are already defined globally and should apply */
 
 .form-page-container .form-control::placeholder {
     color: var(--input-placeholder-color, #6c757d);
@@ -2721,7 +2601,7 @@ hr.section-divider { /* For <hr> between settings sections */
 
 /* Styles for invalid fields */
 .form-page-container .form-control.is-invalid {
-    border-color: var(--color-danger, #dc3545) !important;
+    border-color: var(--color-danger, #dc3545) !important; /* Important to override general focus */
     box-shadow: var(--shadow-inner, inset 0 2px 4px 0 rgba(0,0,0,0.1)), 0 0 0 0.2rem rgba(var(--color-danger-rgb, 220, 53, 69), 0.15);
 }
 .form-page-container .form-control.is-invalid:focus {
@@ -2734,6 +2614,7 @@ hr.section-divider { /* For <hr> between settings sections */
     font-size: var(--font-size-sm, 0.875rem);
     margin-top: var(--spacing-1);
     display: block;
+
 }
 
 .form-page-container textarea.form-control {
@@ -2788,41 +2669,106 @@ hr.section-divider { /* For <hr> between settings sections */
     }
 }
 
-.site-footer {
-    background-color: var(--color-surface); /* White background */
-    color: var(--color-text-muted); /* Muted text color */
-    padding: var(--spacing-3) 0;
+
+/* --- Site Settings Page Styles --- */
+.site-settings-page {
+    min-width: 800px; /* Or var(--container-width-md, 800px) if such a variable exists */
+    margin: var(--spacing-5, 2rem) auto;
+    padding: var(--spacing-4, 1.5rem);
+    background-color: var(--color-surface, #2c2c2c);
+}
+
+.site-settings-page .page-header {
+    margin-bottom: var(--spacing-4, 1.5rem);
+    padding-bottom: var(--spacing-3, 1rem);
+    border-bottom: 1px solid var(--color-border, #444);
     text-align: center;
-    font-size: 0.9rem;
-    border-top: 1px solid var(--color-border); /* Subtle border */
 }
 
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.site-settings-page .page-header h1 {
+    color: var(--color-headings, #e0e0e0);
+    font-size: var(--font-size-xxl, 2rem);
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
-.footer-content p {
-    margin: 0 0 var(--spacing-1) 0;
+.settings-form .form-group {
+    margin-bottom: var(--spacing-4, 1.5rem);
 }
 
-.footer-nav {
-    margin-top: 10px;
+.settings-form .form-group label {
+    display: block;
+    margin-bottom: var(--spacing-2, 0.5rem);
+    color: var(--color-text-muted, #b0b0b0);
+    font-weight: var(--font-weight-medium, 500);
+    font-size: var(--font-size-md, 0.95em);
 }
 
-.footer-nav a {
-    color: var(--color-primary);
-    text-decoration: none;
-    margin: 0 var(--spacing-1);
-    transition: color 0.3s ease;
+.settings-form .form-group input[type="text"],
+.settings-form .form-group input[type="email"],
+.settings-form .form-group textarea {
+    width: 100%;
+    padding: var(--input-padding-y, 0.75rem) var(--input-padding-x, 1rem);
+    border: 1px solid var(--input-border-color, var(--color-border, #555));
+    border-radius: var(--input-border-radius, var(--border-radius-md, 5px));
+    background-color: var(--input-bg, var(--color-surface-accent, #3a3a3a));
+    color: var(--input-color, var(--color-text, #e0e0e0));
+    font-size: var(--font-size-base, 1em); /* Assuming --font-size-base is defined or use --font-size-md */
+    box-sizing: border-box;
+    transition: border-color var(--transition-duration, 0.3s) ease, box-shadow var(--transition-duration, 0.3s) ease;
 }
 
-.footer-nav a:hover,
-.footer-nav a:focus {
-    color: var(--color-primary-dark);
-    text-decoration: underline;
+.settings-form .form-group input[type="text"]:focus,
+.settings-form .form-group input[type="email"]:focus,
+.settings-form .form-group textarea:focus {
+    border-color: var(--input-focus-border-color, var(--color-primary, #777));
+    outline: none;
+    box-shadow: var(--input-focus-box-shadow, 0 0 0 0.2rem rgba(var(--color-primary-rgb, 127, 90, 240), 0.25));
 }
+
+.settings-form .form-group textarea {
+    min-height: 100px; /* Or var(--textarea-min-height, 100px) */
+    resize: vertical;
+}
+
+.settings-form .form-actions {
+    margin-top: var(--spacing-5, 2rem);
+    text-align: right;
+}
+
+.site-settings-page .message.message--error {
+    background-color: rgba(var(--color-danger-rgb, 220, 53, 69), 0.1);
+    border: 1px solid var(--color-danger, #dc3545);
+    border-left-width: 5px; /* For emphasis */
+    border-left-color: var(--color-danger, #dc3545);
+    color: var(--color-danger-dark, #a32835); /* Assuming --color-danger-dark is defined */
+    padding: var(--spacing-3, 1rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
+    border-radius: var(--border-radius-md, 5px);
+}
+
+.site-settings-page .message.message--error p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.site-settings-page .message.message--success {
+    background-color: rgba(var(--color-success-rgb, 25, 135, 84), 0.1);
+    border: 1px solid var(--color-success, #198754);
+    border-left-width: 5px;
+    border-left-color: var(--color-success, #198754);
+    color: var(--color-success-dark, #12613c); /* Assuming --color-success-dark is defined */
+    padding: var(--spacing-3, 1rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
+    border-radius: var(--border-radius-md, 5px);
+}
+.site-settings-page .message.message--success p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.main-content .site-settings-page {
+    margin-top: 0;
+}
+
+/* --- End Site Settings Page Styles --- */

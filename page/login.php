@@ -21,22 +21,7 @@ unset($_SESSION['success_message']);
 
 <div class="auth-page-container">
     <h1 class="page-title auth-page-main-title">Login to Your Account</h1>
-
-    <div class="auth-form-card">
-        <?php
-        if ($success_message): ?>
-            <div class="messages success">
-                <p><?php echo htmlspecialchars($success_message); ?></p>
-            </div>
-        <?php endif; ?>
-        <?php if (!empty($errors_login)): ?>
-            <div class="messages error">
-                <?php foreach ($errors_login as $field => $error_message):?>
-                    <p><?php echo htmlspecialchars($error_message); ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-        
+    <div class="auth-form-card">      
         <form action="/modules/login_process.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token_login); ?>">
             <div class="form-group">
@@ -46,7 +31,7 @@ unset($_SESSION['success_message']);
                     <input type="text" id="login_username_or_email" name="username_or_email" class="form-control <?php echo !empty($errors_login['username_or_email']) || !empty($errors_login['credentials']) || !empty($errors_login['csrf']) ? 'is-invalid' : ''; ?>" placeholder="e.g., yourname or email@example.com" required value="<?php echo htmlspecialchars($submitted_username_or_email); ?>">
                 </div>
                 <?php if (!empty($errors_login['username_or_email'])): ?>
-                    <div class="error-text"><?php echo htmlspecialchars($errors_login['username_or_email']); ?></div>
+                    <div class="error-text"><?php echo htmlspecialchars($errors_login['username_or_email']['text']); ?></div>
                 <?php endif; ?>
             </div>
             <div class="form-group">
@@ -56,13 +41,13 @@ unset($_SESSION['success_message']);
                     <input type="password" id="login_password" name="password" class="form-control <?php echo !empty($errors_login['password']) || !empty($errors_login['credentials']) ? 'is-invalid' : ''; ?>" placeholder="Enter your password" required>
                 </div>
                 <?php if (!empty($errors_login['password'])): ?>
-                    <div class="error-text"><?php echo htmlspecialchars($errors_login['password']); ?></div>
+                    <div class="error-text"><?php echo htmlspecialchars($errors_login['password']['text']); ?></div>
                 <?php endif; ?>
                 <?php if (!empty($errors_login['credentials'])): ?>
-                    <div class="error-text"><?php echo htmlspecialchars($errors_login['credentials']); ?></div>
+                    <div class="error-text"><?php echo htmlspecialchars($errors_login['credentials']['text']); ?></div>
                 <?php endif; ?>
                  <?php if (!empty($errors_login['csrf'])):  ?>
-                    <div class="error-text"><?php echo htmlspecialchars($errors_login['csrf']); ?></div>
+                    <div class="error-text"><?php echo htmlspecialchars($errors_login['csrf']['text']); ?></div>
                 <?php endif; ?>
             </div>
             <div class="form-group form-checkbox-group">

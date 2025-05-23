@@ -3,35 +3,58 @@ namespace App\Components;
 
 class QuickLinksComponent
 {
-    private array $linksConfig;
+    private array $config;
     private ?string $currentUserRole;
 
-    public function __construct(array $linksConfig, ?string $currentUserRole)
+    public function __construct(array $config, ?string $currentUserRole)
     {
-        $this->linksConfig = $linksConfig;
+        $this->config = $config;
         $this->currentUserRole = $currentUserRole;
     }
 
     public function render(): string
     {
-        if (empty($this->currentUserRole)) {
-            return ''; 
+        $output = '';
+        $linksToDisplay = [];
+
+        if (!isset($this->config['links']) || !is_array($this->config['links'])) {
+            return '';
         }
 
-        $html = '<ul class="quick-links-widget__list">';
-        foreach ($this->linksConfig as $link) {
-            $requiresAdmin = isset($link['requires_admin']) && $link['requires_admin'];
-
-            if ($requiresAdmin && $this->currentUserRole !== 'admin') {
+        foreach ($this->config['links'] as $link) {
+            if (!is_array($link)) {
                 continue;
             }
 
-            $url = htmlspecialchars($link['url']);
-            $text = htmlspecialchars($link['text']);
+            $showLink = false;
+            if (empty($link['roles'])) {
+                $showLink = true;
+            } elseif ($this->currentUserRole && isset($link['roles']) && is_array($link['roles']) && in_array($this->currentUserRole, $link['roles'], true)) {
+                $showLink = true;
+            }
 
-            $html .= '<li><a href="' . $url . '">' . $text . '</a></li>';
+            if ($showLink) {
+                $linksToDisplay[] = $link;
+            }
         }
-        $html .= '</ul>';
-        return $html;
+
+        if (!empty($linksToDisplay)) {
+            $output .= '<div class="quick-links-widget">';
+            
+            if (!empty($this->config['title'])) {
+                $output .= '<h3 class="widget-title">' . htmlspecialchars($this->config['title']) . '</h3>';
+            }
+            
+            $output .= '<ul class="quick-links-list">';
+            foreach ($linksToDisplay as $linkItem) {
+                $url = $linkItem['url'] ?? '#';
+                $text = $linkItem['text'] ?? 'Unnamed Link';
+
+                $output .= '<li><a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($text) . '</a></li>';
+            }
+            $output .= '</ul>';
+            $output .= '</div>';
+        }
+        return $output;
     }
 }

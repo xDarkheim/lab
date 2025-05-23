@@ -27,7 +27,7 @@ class Router {
                 exit();
             }
 
-            $page_title = SITE_NAME . (isset($route_config['title']) ? ' | ' . $route_config['title'] : '');
+            $page_title = (isset($route_config['title']) ? ' | ' . $route_config['title'] : '');
             $content_file_path = $this->page_path . $route_config['file'];
 
             if (file_exists($content_file_path)) {
@@ -35,7 +35,7 @@ class Router {
                 return true;
             } else {
                 error_log("Router error: Page file '{$route_config['file']}' not found for page key '{$page_key}'.");
-                $page_title = SITE_NAME . ' | Page Not Found';
+                $page_title = 'Page Not Found';
                 $content_file = $this->page_path . '404.php';
                 if (!headers_sent()) {
                     header("HTTP/1.0 404 Not Found");
@@ -44,7 +44,7 @@ class Router {
             }
         }
 
-        $page_title = SITE_NAME . ' | Page Not Found';
+        $page_title = 'Page Not Found';
         $content_file = $this->page_path . '404.php';
         if (!headers_sent()) {
             header("HTTP/1.0 404 Not Found");

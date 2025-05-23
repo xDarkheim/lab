@@ -10,11 +10,6 @@
     <title><?php echo $page_title; ?></title>
 </head>
 <body>
-    <?php
-    if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
-        echo '<div style="background-color: #ffc107; color: #333; padding: 8px 15px; text-align: center; font-weight: bold; border-bottom: 2px solid #e0a800; position: sticky; top: 0; z-index: 1050;">ADMIN MODE ACTIVE</div>';
-    }
-    ?>
     <header class="site-header">
         <div class="header-container">
             <div class="logo">

@@ -90,6 +90,24 @@ return [
         'auth_required' => true,
         'guest_only' => false,
     ],
+    'site_settings' => [ // Key remains, path changes
+        'file' => 'site_settings.php', // New path and filename
+        'title' => 'Site Settings',
+        'auth_required' => true,
+        'guest_only' => false,
+    ],
+    'manage_users' => [ // Key remains, path changes
+        'file' => 'account/manage_users.php', // New path and filename
+        'title' => 'Manage Users',
+        'auth_required' => true,
+        'guest_only' => false,
+    ],
+    'edit_user' => [ // Key remains, path changes
+        'file' => 'account/edit_user.php', // New path and filename
+        'title' => 'Edit User',
+        'auth_required' => true,
+        'guest_only' => false,
+    ],
     'profile/edit' => [
         'controller' => App\Controllers\ProfileController::class,
         'action' => 'editProfilePage',

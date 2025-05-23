@@ -8,6 +8,5 @@ define('DB_USER', 'test');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
-define('SITE_NAME', 'Darkheim.Hub');
 define('SITE_THEME', 'default');
 ?>

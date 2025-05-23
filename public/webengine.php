@@ -2,22 +2,28 @@
 require_once dirname(__DIR__) . '/includes/config/app_config.php'; 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-
 use App\Lib\Database;
 use App\Lib\Router;
 use App\Lib\FlashMessageService;
+use App\Lib\Auth;
 use App\Components\NavigationComponent;
 use App\Components\UserPanelComponent;
 use App\Components\QuickLinksComponent;
+use App\Lib\SettingsManager;
 
-$database = new Database();
-$db = $database->getConnection(); 
+$database_handler = new Database();
+$db = $database_handler->getConnection();
 
 if ($db === null) {
     error_log("Critical Error: Database connection failed. Check Database class and config.");
 }
 
+$settingsManager = new SettingsManager($database_handler);
+$site_settings_from_db = $settingsManager->getAllSettings();
+
 $flashMessageService = new FlashMessageService();
+
+$auth = new Auth($database_handler, $flashMessageService);
 
 $routes_config = require_once ROOT_PATH . DS . 'includes' . DS . 'config' . DS . 'routes_config.php';
 
@@ -49,11 +55,11 @@ $current_user_role = $_SESSION['user_role'] ?? null;
 
 $template_data = [];
 
-$template_data['page_title'] = htmlspecialchars($page_title ?? SITE_NAME);
+$template_data['page_title'] = htmlspecialchars($page_title ?? $site_settings_from_db['site_name'] ?? 'Default Site Name');
 
-$template_data['site_name_logo'] = defined('SITE_NAME') ? htmlspecialchars(SITE_NAME) : 'WebEngine Darkheim';
+$template_data['site_name_logo'] = htmlspecialchars($site_settings_from_db['site_name'] ?? 'WebEngine Darkheim');
 
-$template_data['database_handler'] = $database;
+$template_data['database_handler'] = $database_handler;
 $template_data['db'] = $db;
 
 $template_data['page_messages'] = $final_page_messages;
@@ -61,7 +67,7 @@ $template_data['page_messages'] = $final_page_messages;
 $navigationComponent = new NavigationComponent($page_key); 
 $template_data['main_navigation_html'] = $navigationComponent->render();
 
-$auth_pages_no_sidebar = ['login', 'register']; 
+$auth_pages_no_sidebar = ['login', 'register', 'edit_user']; 
 
 if (in_array($page_key, $auth_pages_no_sidebar)) {
     $template_data['sidebar_user_panel_html'] = '';

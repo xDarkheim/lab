@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: /index.php?page=account_dashboard');
         exit;
     } else {
-        $_SESSION['login_errors'] = ['credentials' => 'Invalid username/email or password.'];
+        $_SESSION['login_errors']['credentials'] = ['text' => 'Invalid username/email or password.'];
         if (isset($loginResult['errors']) && is_array($loginResult['errors'])) {
             $_SESSION['login_errors']['details'] = $loginResult['errors'];
         }

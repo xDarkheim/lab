@@ -18,7 +18,7 @@
             <?php echo $main_navigation_html; ?>
             <button class="mobile-nav-toggle" aria-controls="main-navigation" aria-expanded="false">
                 <span class="sr-only">Menu</span>
-                &#9776; <?php // Hamburger icon ?>
+                &#9776;
             </button>
         </div>
     </header>

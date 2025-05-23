@@ -33,36 +33,54 @@ $page_key = isset($_GET['page']) ? trim(strtolower($_GET['page'])) : 'home';
 
 $router->dispatch($page_key);
 
-$page_messages_from_service = $flashMessageService->getMessages();
+$all_messages_from_service = $flashMessageService->getMessages();
+$sidebar_success_text_identifier = $_SESSION['success_message_sidebar'] ?? null;
 
-$page_success_message_sidebar_text = $_SESSION['success_message_sidebar'] ?? null;
 if (isset($_SESSION['success_message_sidebar'])) {
     unset($_SESSION['success_message_sidebar']);
 }
 
-$final_page_messages = [];
-if ($page_success_message_sidebar_text !== null) {
-    foreach ($page_messages_from_service as $msg) {
-        if (!($msg['text'] === $page_success_message_sidebar_text && $msg['type'] === 'success')) {
-            $final_page_messages[] = $msg;
+$messages_for_main_display = [];
+$text_for_sidebar_component = null;
+
+if ($sidebar_success_text_identifier !== null) {
+    foreach ($all_messages_from_service as $msg) {
+        if ($msg['text'] === $sidebar_success_text_identifier && $msg['type'] === 'success') {
+            $text_for_sidebar_component = $msg['text'];
+        } else {
+            $messages_for_main_display[] = $msg;
         }
     }
 } else {
-    $final_page_messages = $page_messages_from_service;
+    $messages_for_main_display = $all_messages_from_service;
 }
 
 $current_user_role = $_SESSION['user_role'] ?? null;
 
 $template_data = [];
 
-$template_data['page_title'] = htmlspecialchars($page_title ?? $site_settings_from_db['site_name'] ?? 'Default Site Name');
+$site_name_from_db = $site_settings_from_db['site_name'] ?? 'WebEngine Darkheim';
 
-$template_data['site_name_logo'] = htmlspecialchars($site_settings_from_db['site_name'] ?? 'WebEngine Darkheim');
+$current_page_specific_title = $page_title ?? null; 
+
+if ($current_page_specific_title && $current_page_specific_title !== $site_name_from_db) {
+    $title_for_html_tag = $site_name_from_db . " " . $current_page_specific_title;
+    $main_heading_for_page = $current_page_specific_title;
+} else {
+    $title_for_html_tag = $site_name_from_db;
+    $main_heading_for_page = $site_name_from_db;
+}
+
+$template_data['page_title'] = htmlspecialchars($title_for_html_tag); 
+$template_data['page_main_heading'] = htmlspecialchars($main_heading_for_page); 
+$template_data['site_name_logo'] = htmlspecialchars($site_name_from_db); 
+
+$template_data['site_config'] = $site_settings_from_db;
 
 $template_data['database_handler'] = $database_handler;
 $template_data['db'] = $db;
 
-$template_data['page_messages'] = $final_page_messages;
+$template_data['page_messages'] = $messages_for_main_display;
 
 $navigationComponent = new NavigationComponent($page_key); 
 $template_data['main_navigation_html'] = $navigationComponent->render();
@@ -77,7 +95,7 @@ if (in_array($page_key, $auth_pages_no_sidebar)) {
     $userPanelComponent = new UserPanelComponent(
         $current_user_role,
         [],
-        $page_success_message_sidebar_text 
+        $text_for_sidebar_component
     );
     $sidebar_user_panel_html = $userPanelComponent->render();
     $template_data['sidebar_user_panel_html'] = $sidebar_user_panel_html;

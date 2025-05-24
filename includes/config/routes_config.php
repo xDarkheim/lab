@@ -18,9 +18,15 @@ return [
         'auth_required' => false,
         'guest_only' => false,
     ],
-        'login' => [
+    'login' => [
         'file' => 'login.php',
         'title' => 'Login',
+        'auth_required' => false,
+        'guest_only' => false,
+    ],
+    'forgot_password' => [
+        'file' => 'forgot_password.php',
+        'title' => 'Forgot Password',
         'auth_required' => false,
         'guest_only' => false,
     ],

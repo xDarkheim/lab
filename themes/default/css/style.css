@@ -2043,6 +2043,12 @@ hr.section-divider { /* For <hr> between settings sections */
 }
 
 /* Styles for category tags in the articles management table */
+.manage-articles-page,
+.edit-article-page {
+    min-width: 800px; /* Prevents the table from collapsing too much */
+    margin: var(--spacing-3) auto var(--spacing-5) auto; /* Centered with some margin */
+    padding: var(--spacing-4);
+}
 .articles-table .categories-cell {
     min-width: 150px; /* Prevent tags from collapsing too much */
 }

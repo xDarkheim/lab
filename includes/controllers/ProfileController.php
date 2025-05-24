@@ -3,15 +3,18 @@ namespace App\Controllers;
 
 use App\Lib\Database;
 use App\Models\User;
+use App\Lib\FlashMessageService; // Assuming FlashService is in App\Lib
 
 class ProfileController {
     private Database $db_handler;
     private int $userId;
+    private FlashMessageService $flashService;
     private ?User $user = null;
 
-    public function __construct(Database $db_handler, int $userId) {
+    public function __construct(Database $db_handler, int $userId, FlashMessageService $flashService) {
         $this->db_handler = $db_handler;
         $this->userId = $userId;
+        $this->flashService = $flashService;
     }
 
     private function loadUser(): ?User {
@@ -24,17 +27,21 @@ class ProfileController {
 
     public function getCurrentUserData(): ?array {
         $user = $this->loadUser();
-        if ($user) {
-            return [
-                'username' => $user->getUsername(),
-                'email' => $user->getEmail(),
-                'location' => $user->getLocation(),
-                'user_status' => $user->getUserStatus(),
-                'bio' => $user->getBio(),
-                'website_url' => $user->getWebsiteUrl(),
-            ];
+        if (!$user) {
+            return null;
         }
-        return null;
+        $userData = [
+            'id' => $user->getId(),
+            'username' => $user->getUsername(),
+            'email' => $user->getEmail(),
+            'role' => $user->getRole(),
+            'created_at' => $user->getCreatedAt(),
+            'location' => $user->getLocation(),
+            'user_status' => $user->getUserStatus(),
+            'bio' => $user->getBio(),
+            'website_url' => $user->getWebsiteUrl(),
+        ];
+        return $userData;
     }
 
     public function handleChangePasswordRequest(array $postData): array {
@@ -80,14 +87,11 @@ class ProfileController {
         return $message;
     }
 
-    public function handleUpdateDetailsRequest(array $postData): array {
-        $message = ['text' => '', 'type' => 'error'];
-
+    public function handleUpdateDetailsRequest(array $postData): void {
         $user = $this->loadUser();
         if (!$user) {
-            $message['text'] = "Error: User not found.";
             error_log("ProfileController: User not found for ID: " . $this->userId . " during details update.");
-            return $message;
+            return;
         }
 
         $detailsToUpdate = [];
@@ -96,14 +100,14 @@ class ProfileController {
         if (in_array('email', $updateAttemptedFields)) {
             $newEmail = trim($postData['email'] ?? '');
             if (empty($newEmail) || !filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
-                $message['text'] = "Please enter a valid email address.";
-                return $message;
+                $this->flashService->addError("Please enter a valid email address.");
+                return;
             }
             if ($newEmail !== $user->getEmail()) {
                 $existingUserByEmail = User::findByUsernameOrEmail($this->db_handler, '', $newEmail);
                 if ($existingUserByEmail && $existingUserByEmail['id'] != $this->userId) {
-                    $message['text'] = "This email is already in use by another account.";
-                    return $message;
+                    $this->flashService->addError("This email is already in use by another account.");
+                    return;
                 }
                 $detailsToUpdate['email'] = $newEmail;
             }
@@ -134,8 +138,8 @@ class ProfileController {
             $newWebsiteUrl = isset($postData['website_url']) ? trim($postData['website_url']) : null;
             if ($newWebsiteUrl && !filter_var($newWebsiteUrl, FILTER_VALIDATE_URL)) {
                 if (!preg_match('/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i', $newWebsiteUrl) && !filter_var("http://" . $newWebsiteUrl, FILTER_VALIDATE_URL)) {
-                    $message['text'] = "Please enter a valid website URL.";
-                    return $message;
+                    $this->flashService->addError("Please enter a valid website URL.");
+                    return;
                 }
             }
             if ($newWebsiteUrl !== $user->getWebsiteUrl()) {
@@ -144,19 +148,16 @@ class ProfileController {
         }
 
         if (empty($detailsToUpdate)) {
-            $message['text'] = "No changes detected.";
-            $message['type'] = 'info';
-            return $message;
+            $this->flashService->addInfo("No changes detected.");
+            return;
         }
 
-        if ($user->updateDetails($detailsToUpdate)) {
-            $message['text'] = "Profile details updated successfully.";
-            $message['type'] = 'success';
+        if ($this->user->updateDetails($detailsToUpdate)) {
+            $this->flashService->addSuccess("Profile details updated successfully.");
         } else {
-            $message['text'] = "Failed to update profile details. Please try again.";
+            $this->flashService->addError("Failed to update profile details. Please try again.");
             error_log("ProfileController: Failed to update details for user ID: " . $this->userId . " Details: " . print_r($detailsToUpdate, true));
         }
-        return $message;
     }
 }
 ?>

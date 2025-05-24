@@ -172,6 +172,10 @@ WebEngine Darkheim is a web application focused on providing a resource hub for 
     ('site_name', 'Darkheim WebEngine'),
     ('site_tagline', 'Your Hub for Web Development Insights'),
     ('admin_email', 'admin@example.com');
+
+    ALTER TABLE `users`
+    ADD COLUMN `reset_token_hash` VARCHAR(255) NULL DEFAULT NULL AFTER `role`,
+    ADD COLUMN `reset_token_expires_at` DATETIME NULL DEFAULT NULL AFTER `reset_token_hash`;
     ```
 
 4.  **Permissions**: Ensure the web server has appropriate write permissions for any directories that require it (e.g., if you plan to have file uploads or a server-side cache).

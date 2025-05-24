@@ -7,22 +7,29 @@ use App\Lib\Database;
 use App\Controllers\ProfileController;
 
 $userId = (int)$_SESSION['user_id'];
-$database_handler = new Database();
-$profileController = new ProfileController($database_handler, $userId);
+$profileController = new ProfileController($database_handler, $userId, $flashMessageService);
 
 $page_message = ['text' => '', 'type' => ''];
 $userData = $profileController->getCurrentUserData();
 
-// CSRF token for the form
 if (!isset($_SESSION['csrf_token_edit_profile_info'])) {
     $_SESSION['csrf_token_edit_profile_info'] = bin2hex(random_bytes(32));
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (!isset($_POST['csrf_token_edit_profile_info']) || !hash_equals($_SESSION['csrf_token_edit_profile_info'], $_POST['csrf_token_edit_profile_info'])) {
-        $page_message['text'] = 'Security error: Invalid CSRF token. Please refresh the page and try again.';
-        $page_message['type'] = 'error';
+    if (!isset($_POST['csrf_token_edit_profile_info']) || !hash_equals($_SESSION['csrf_token_edit_profile_info'] ?? '', $_POST['csrf_token_edit_profile_info'] ?? '')) {
+
+        if (isset($flashMessageService)) { 
+            $flashMessageService->addError('Security error: Invalid CSRF token. Please refresh the page and try again.');
+        } else {
+            $page_message['text'] = 'Security error: Invalid CSRF token. Please refresh the page and try again.';
+            $page_message['type'] = 'error';
+        }
+        header('Location: /index.php?page=account_edit_profile');
+        exit;
     } else {
+        $_SESSION['csrf_token_edit_profile_info'] = bin2hex(random_bytes(32));
+
         if (isset($_POST['update_profile_info'])) {
             $profileInfoData = [
                 'location' => $_POST['location'] ?? null,
@@ -30,12 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'bio' => $_POST['bio'] ?? null,
                 'website_url' => $_POST['website_url'] ?? null,
             ];
-            $page_message = $profileController->handleUpdateDetailsRequest($profileInfoData);
-            if ($page_message['type'] === 'success' || $page_message['type'] === 'info') {
-                $userData = $profileController->getCurrentUserData();
-            }
-            // Regenerate token
-            $_SESSION['csrf_token_edit_profile_info'] = bin2hex(random_bytes(32));
+            $profileController->handleUpdateDetailsRequest($profileInfoData);
+
+            header('Location: /index.php?page=account_edit_profile');
+            exit;
         }
     }
 }
@@ -73,6 +78,16 @@ if (!$userData) {
                 </div>
                 <div class="setting-control">
                     <input type="text" id="username-display" name="username_display" class="form-control" value="<?php echo htmlspecialchars($userData['username'] ?? ''); ?>" disabled>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <label for="email">Email:</label>
+                    <small class="setting-description">Your account email address.</small>
+                </div>
+                <div class="setting-control">
+                    <input type="email" id="email" name="email" class="form-control" value="<?php echo htmlspecialchars($userData['email'] ?? ''); ?>" disabled>
                 </div>
             </div>
 

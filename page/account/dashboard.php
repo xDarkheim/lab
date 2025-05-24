@@ -3,16 +3,16 @@
 use App\Controllers\ProfileController;
 use App\Lib\FlashMessageService;
 
+$flashMessageService = new FlashMessageService();
+
 if (!isset($_SESSION['user_id'])) {
-    $flashMessageService = new FlashMessageService();
     $flashMessageService->addError('Please log in to access your dashboard.');
     header("Location: /index.php?page=login");
     exit();
 }
-
 $userId = (int)$_SESSION['user_id'];
 
-$profileController = new ProfileController($database_handler, $userId);
+$profileController = new ProfileController($database_handler, $userId, $flashMessageService);
 $userData = $profileController->getCurrentUserData();
 
 $user_article_count = 0;
@@ -50,6 +50,9 @@ if (!$userData) {
         'website_url' => ''
     ];
     error_log("Dashboard: Failed to load full user data for user ID: " . $userId . ". Using defaults.");
+} else {
+    // Logging loaded user data
+    error_log("Dashboard: User data loaded: " . print_r($userData, true));
 }
 
 ?>
@@ -89,6 +92,9 @@ if (!$userData) {
         <h3 class="dashboard-section-title">Profile Snapshot</h3>
         <ul class="profile-details-list">
             <li><strong>Email:</strong> <?php echo htmlspecialchars($userData['email'] ?? 'N/A'); ?></li>
+            <?php if (!empty($userData['user_status'])): ?>
+            <li><strong>Status/Mood:</strong> <?php echo htmlspecialchars($userData['user_status']); ?></li>
+            <?php endif; ?>
             <li><strong>Location:</strong> <?php echo htmlspecialchars($userData['location'] ?? 'Not specified'); ?></li>
             <?php if (!empty($userData['website_url'])): ?>
             <li><strong>Website:</strong> <a href="<?php echo htmlspecialchars($userData['website_url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo htmlspecialchars($userData['website_url']); ?></a></li>

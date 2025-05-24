@@ -19,6 +19,10 @@ class User {
     private ?string $user_status = null;
     private ?string $bio = null;
     private ?string $website_url = null;
+    private ?string $updated_at = null;
+
+    private ?string $reset_token_hash = null;
+    private ?string $reset_token_expires_at = null;
 
     private Database $db_handler;
 
@@ -64,6 +68,20 @@ class User {
 
     public function getWebsiteUrl(): ?string {
         return $this->website_url;
+    }
+
+    public function getUpdatedAt(): ?string {
+        return $this->updated_at;
+    }
+    // Геттеры для новых свойств
+    public function getResetTokenHash(): ?string
+    {
+        return $this->reset_token_hash;
+    }
+
+    public function getResetTokenExpiresAt(): ?string
+    {
+        return $this->reset_token_expires_at;
     }
 
     public function setUsername(string $username): void {
@@ -171,10 +189,26 @@ class User {
         $conn = $db_handler->getConnection();
         if (!$conn) return null;
 
-        $stmt = $conn->prepare("SELECT id, username, email, password_hash, role, created_at, location, user_status, bio, website_url FROM users WHERE username = ? OR email = ?");
-        if ($stmt === false) return null;
+        $stmt = $conn->prepare(
+            "SELECT id, username, email, password_hash, role, created_at, updated_at, location, user_status, bio, website_url, reset_token_hash, reset_token_expires_at 
+             FROM users 
+             WHERE username = :username_identifier OR email = :email_identifier"
+        );
+        if ($stmt === false) {
+            error_log("User::findByIdentifier - Failed to prepare statement.");
+            return null;
+        }
 
-        $stmt->execute([$identifier, $identifier]);
+        $stmt->bindParam(':username_identifier', $identifier, PDO::PARAM_STR);
+        $stmt->bindParam(':email_identifier', $identifier, PDO::PARAM_STR);
+        
+        try {
+            $stmt->execute();
+        } catch (\PDOException $e) {
+            error_log("User::findByIdentifier - PDOException on execute: " . $e->getMessage());
+            return null;
+        }
+        
         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($userData) {
@@ -183,12 +217,15 @@ class User {
             $user->username = $userData['username'];
             $user->email = $userData['email'];
             $user->password_hash = $userData['password_hash'];
-            $user->role = $userData['role'] ?? 'user';
+            $user->role = $userData['role'];
             $user->created_at = $userData['created_at'];
-            $user->location = $userData['location'];
-            $user->user_status = $userData['user_status'];
-            $user->bio = $userData['bio'];
-            $user->website_url = $userData['website_url'];
+            $user->updated_at = $userData['updated_at'] ?? null;
+            $user->location = $userData['location'] ?? null;
+            $user->user_status = $userData['user_status'] ?? null;
+            $user->bio = $userData['bio'] ?? null;
+            $user->website_url = $userData['website_url'] ?? null;
+            $user->reset_token_hash = $userData['reset_token_hash'] ?? null;
+            $user->reset_token_expires_at = $userData['reset_token_expires_at'] ?? null;
             return $user;
         }
         return null;
@@ -202,7 +239,7 @@ class User {
             return null;
         }
         try {
-            $stmt = $conn->prepare("SELECT * FROM users WHERE id = :id");
+            $stmt = $conn->prepare("SELECT id, username, email, password_hash, role, created_at, updated_at, location, user_status, bio, website_url, reset_token_hash, reset_token_expires_at FROM users WHERE id = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -211,8 +248,16 @@ class User {
                 $this->id = (int)$userData['id'];
                 $this->username = $userData['username'];
                 $this->email = $userData['email'];
+                $this->password_hash = $userData['password_hash'];
                 $this->role = $userData['role'];
                 $this->created_at = $userData['created_at'];
+                $this->updated_at = $userData['updated_at'] ?? null;
+                $this->location = $userData['location'] ?? null;
+                $this->user_status = $userData['user_status'] ?? null;
+                $this->bio = $userData['bio'] ?? null;
+                $this->website_url = $userData['website_url'] ?? null;
+                $this->reset_token_hash = $userData['reset_token_hash'] ?? null;
+                $this->reset_token_expires_at = $userData['reset_token_expires_at'] ?? null;
                 return $this; 
             }
         } catch (\PDOException $e) {
@@ -316,6 +361,66 @@ class User {
             error_log("User model (updateDetails): Failed to execute statement: " . implode(":", $stmt->errorInfo()));
         }
         return $result;
+    }
+
+    public function findByEmail(string $email): ?self
+    {
+        $conn = $this->db_handler->getConnection();
+        if (!$conn) {
+            error_log("User::findByEmail - Database connection failed.");
+            return null;
+        }
+        try {
+            $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->execute();
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($userData) {
+                $foundUser = new self($this->db_handler);
+                $foundUser->id = (int)$userData['id'];
+                $foundUser->username = $userData['username'];
+                $foundUser->email = $userData['email'];
+                $foundUser->password_hash = $userData['password_hash'];
+                $foundUser->role = $userData['role'];
+                $foundUser->reset_token_hash = $userData['reset_token_hash'];
+                $foundUser->reset_token_expires_at = $userData['reset_token_expires_at'];
+                $foundUser->created_at = $userData['created_at'];
+                $foundUser->updated_at = $userData['updated_at'];
+                return $foundUser;
+            }
+        } catch (\PDOException $e) {
+            error_log("User::findByEmail - PDOException for email {$email}: " . $e->getMessage());
+        }
+        return null;
+    }
+
+    public function setPasswordResetToken(string $token, int $validityDurationSeconds = 3600): bool
+    {
+        if (!$this->id) {
+            error_log("User::setPasswordResetToken - User ID not set.");
+            return false;
+        }
+
+        $conn = $this->db_handler->getConnection();
+        if (!$conn) {
+            error_log("User::setPasswordResetToken - Database connection failed for user ID {$this->id}.");
+            return false;
+        }
+
+        $this->reset_token_hash = password_hash($token, PASSWORD_DEFAULT);
+        $this->reset_token_expires_at = date('Y-m-d H:i:s', time() + $validityDurationSeconds);
+
+        try {
+            $stmt = $conn->prepare("UPDATE users SET reset_token_hash = :token_hash, reset_token_expires_at = :expires_at WHERE id = :id");
+            $stmt->bindParam(':token_hash', $this->reset_token_hash, PDO::PARAM_STR);
+            $stmt->bindParam(':expires_at', $this->reset_token_expires_at, PDO::PARAM_STR);
+            $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (\PDOException $e) {
+            error_log("User::setPasswordResetToken - PDOException for user ID {$this->id}: " . $e->getMessage());
+            return false;
+        }
     }
 
     public static function getAvailableRoles(): array

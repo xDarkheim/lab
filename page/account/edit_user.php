@@ -3,8 +3,9 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Проверка, что пользователь - администратор
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+use App\Models\User;
+
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== User::ROLE_ADMIN) {
     if (isset($flashMessageService) && $flashMessageService instanceof \App\Lib\FlashMessageService) {
         $flashMessageService->addError("Access Denied. You do not have permission to view this page.");
     }
@@ -12,16 +13,16 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
-use App\Lib\FlashMessageService;
-
 $page_title = "Edit User";
 $user_to_edit = null;
 $user_id = null;
 $errors = [];
-$available_roles = ['user', 'editor', 'admin']; 
+$available_roles = User::getAvailableRoles(); 
 
-if (!isset($flashMessageService) || !$flashMessageService instanceof FlashMessageService) {
-    $flashMessageService = new FlashMessageService();
+if (!isset($flashMessageService)) {
+    error_log("Critical: FlashMessageService not available in edit_user.php");
+    echo "<p class='message message--error'>An unexpected error occurred (Flash service unavailable).</p>";
+    return;
 }
 
 if (!isset($db) || !$db instanceof PDO) {
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($updated_role) || !in_array($updated_role, $available_roles)) {
             $errors[] = "Invalid role selected.";
         }
-        if ($user_id == $_SESSION['user_id'] && $_SESSION['user_role'] === 'admin' && $updated_role !== 'admin') {
+        if ($user_id == $_SESSION['user_id'] && $_SESSION['user_role'] === User::ROLE_ADMIN && $updated_role !== User::ROLE_ADMIN) {
              $errors[] = "You cannot remove your own administrator privileges.";
         }
 

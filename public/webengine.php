@@ -85,13 +85,10 @@ $template_data['page_messages'] = $messages_for_main_display;
 $navigationComponent = new NavigationComponent($page_key); 
 $template_data['main_navigation_html'] = $navigationComponent->render();
 
-$auth_pages_no_sidebar = ['login', 'register', 'edit_user']; 
+$auth_pages_no_sidebar = ['login', 'register', 'edit_user'];
+$show_sidebar = !in_array($page_key, $auth_pages_no_sidebar);
 
-if (in_array($page_key, $auth_pages_no_sidebar)) {
-    $template_data['sidebar_user_panel_html'] = '';
-    $template_data['recent_news_sidebar_html'] = '';
-    $template_data['show_sidebar'] = false;
-} else {
+if ($show_sidebar) {
     $userPanelComponent = new UserPanelComponent(
         $current_user_role,
         [],
@@ -104,6 +101,10 @@ if (in_array($page_key, $auth_pages_no_sidebar)) {
     $quickLinksComponent = new QuickLinksComponent($quick_links_config_array, $current_user_role);
     $template_data['recent_news_sidebar_html'] = $quickLinksComponent->render();
     $template_data['show_sidebar'] = true;
+} else {
+    $template_data['sidebar_user_panel_html'] = '';
+    $template_data['recent_news_sidebar_html'] = '';
+    $template_data['show_sidebar'] = false;
 }
 
 extract($template_data);

@@ -2,10 +2,20 @@
 
 use App\Models\Article;
 use App\Models\Category;
-use App\Lib\Database;
 use App\Lib\FlashMessageService;
 
-$pageTitle = "Create New Article";
+$page_title = "Create New Article";
+
+if (!isset($database_handler) || !$database_handler instanceof \App\Lib\Database) {
+    if(isset($flashMessageService)) $flashMessageService->addError("Database handler error.");
+    echo "<p class='message message--error'>Database handler error.</p>";
+    return;
+}
+if (!isset($flashMessageService)) {
+     error_log("Critical: FlashMessageService not available in create_article.php");
+     echo "<p class='message message--error'>An unexpected error occurred (Flash service unavailable).</p>";
+     return;
+}
 
 $form_validation_errors = $_SESSION['form_validation_errors'] ?? [];
 $form_data = $_SESSION['form_data'] ?? [];
@@ -27,8 +37,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $current_user_id = (int)$_SESSION['user_id'];
-$database_handler = new Database();
-$flashMessageService = new FlashMessageService();
 
 $all_categories = Category::findAll($database_handler);
 
@@ -82,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($newArticleId) {
             $newArticle = Article::findById($database_handler, $newArticleId);
-            if ($newArticle && !empty($selected_category_ids)) {
+            if ($newArticle && method_exists($newArticle, 'setCategories') && !empty($selected_category_ids)) {
                 $newArticle->setCategories($database_handler, $selected_category_ids);
             }
 
@@ -104,10 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="page-container create-article-page">
     <a href="/index.php?page=manage_articles" class="button button-secondary form-page-back-link">&laquo; Back to Manage Articles</a>
-    <h1 style="margin-top: <?php echo (isset($_GET['from']) && $_GET['from'] === 'manage') || !empty($page_messages) ? 'var(--spacing-3)' : '0'; ?>;"><?php echo htmlspecialchars($pageTitle); ?></h1>
+    <h1 style="margin-top: <?php echo (isset($_GET['from']) && $_GET['from'] === 'manage') || !empty($page_messages) ? 'var(--spacing-3)' : '0'; ?>;"><?php echo htmlspecialchars($page_title); ?></h1>
 
-    <?php // Используем $page_messages, переданную из index.php
-    if (!empty($page_messages)): ?>
+    <?php if (!empty($page_messages)): ?>
         <?php foreach ($page_messages as $message): ?>
             <div class="messages <?php echo htmlspecialchars($message['type']); ?>">
                 <p><?php echo htmlspecialchars($message['text']); ?></p>

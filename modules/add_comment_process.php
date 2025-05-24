@@ -62,17 +62,11 @@ if (!$database_handler->getConnection()) {
     exit;
 }
 
-$comment_data = [
-    'article_id' => $article_id,
-    'user_id' => (int)$_SESSION['user_id'],
-    'author_name' => $author_name,
-    'content' => $content,
-    'status' => 'approved'
-];
+$commentModel = new Comments($database_handler);
 
-$comment_id = Comments::create($database_handler, $comment_data);
+$status = Comments::STATUS_PENDING;
 
-if ($comment_id) {
+if ($commentModel->addComment($article_id, $user_id, $content, $author_name, $status)) {
     $flashMessageService->addSuccess('Comment added successfully!');
     $redirect_url .= '#comment-' . $comment_id;
 } else {

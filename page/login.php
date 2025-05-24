@@ -1,4 +1,10 @@
 <?php
+$page_title = "Login";
+
+
+if (!isset($flashMessageService)) {
+    error_log("Critical: FlashMessageService not available in login.php");
+}
 
 if (isset($_SESSION['user_id'])) {
     header("Location: /index.php?page=account_dashboard");
@@ -10,8 +16,8 @@ if (empty($_SESSION['csrf_token_login'])) {
 }
 $csrf_token_login = $_SESSION['csrf_token_login'];
 
-$errors_login = $_SESSION['login_errors'] ?? []; // Use 'login_errors'
-$submitted_username_or_email = $_SESSION['form_data_login']['username_or_email'] ?? ''; // Use 'form_data_login' and 'username_or_email'
+$errors_login = $_SESSION['login_errors'] ?? [];
+$submitted_username_or_email = $_SESSION['form_data_login']['username_or_email'] ?? '';
 $submitted_remember_me = isset($_SESSION['form_data_login']['remember_me']) && $_SESSION['form_data_login']['remember_me'];
 
 $success_message = $_SESSION['success_message'] ?? null;

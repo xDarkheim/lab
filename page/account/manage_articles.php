@@ -1,15 +1,12 @@
 <?php
 
 use App\Models\Article;
-use App\Models\User;
-use App\Lib\Database;
-use App\Lib\FlashMessageService;
+use App\Models\User; 
 
-$pageTitle = "Manage Articles";
-$flashMessageService = new FlashMessageService();
+$page_title = "Manage Articles";
 
 if (!isset($_SESSION['user_id'])) {
-    $flashMessageService->addError('You must be logged in to manage articles.');
+    if(isset($flashMessageService)) $flashMessageService->addError('You must be logged in to manage articles.');
     $redirect_url = urlencode('/index.php?page=manage_articles');
     header('Location: /index.php?page=login&redirect=' . $redirect_url);
     exit;
@@ -23,56 +20,73 @@ $csrf_token_delete = $_SESSION['csrf_token_delete_article'];
 $current_user_id = (int)$_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'user';
 
-$database_handler = new Database();
 $articles_view_data = [];
 $db_connection_error = false;
 
-if (!$database_handler->getConnection()) {
-    $flashMessageService->addError('Failed to connect to the database. Article list cannot be loaded.');
+if (!isset($database_handler) || !$database_handler instanceof \App\Lib\Database) {
+    echo "<p class='message message--error'>Database handler not available.</p>";
+    error_log("Critical: Database handler not available in manage_articles.php");
+    return; // или exit();
+}
+
+if (!isset($db) || !$db instanceof PDO) {
+    echo "<p class='message message--error'>Database connection error.</p>";
     $db_connection_error = true;
-} else {
-    $articles = ($user_role === 'admin')
-        ? Article::findAll($database_handler)
-        : Article::findByUserId($database_handler, $current_user_id);
+}
 
-    if (!empty($articles)) {
-        $user_ids_to_fetch = array_unique(array_filter(array_map(fn($article) => $article->user_id, $articles)));
-        
-        $authors_map = [];
-        if (!empty($user_ids_to_fetch)) {
-            foreach ($user_ids_to_fetch as $uid) {
-                $author = User::findById($database_handler, $uid);
-                $authors_map[$uid] = $author ? $author->getUsername() : 'Unknown User';
-            }
+$articles_per_page = 10;
+$current_page_get = filter_input(INPUT_GET, 'p', FILTER_VALIDATE_INT, ['options' => ['default' => 1, 'min_range' => 1]]);
+$total_articles = 0;
+
+
+$articles_list = ($user_role === User::ROLE_ADMIN)
+    ? Article::findAll($database_handler, $current_page_get, $articles_per_page, $total_articles)
+    : Article::findByUserId($database_handler, $current_user_id);
+
+if (!empty($articles_list)) {
+    $user_ids_to_fetch = array_unique(array_filter(array_map(fn($article) => $article->user_id, $articles_list)));
+    
+    $authors_map = [];
+    if (!empty($user_ids_to_fetch)) {
+        foreach ($user_ids_to_fetch as $uid) {
+            $author_user_model = new User($database_handler);
+            $author_data = $author_user_model->findById($uid);
+            $authors_map[$uid] = $author_data ? $author_data->getUsername() : 'Unknown User';
         }
+    }
 
-        foreach ($articles as $article) {
-            $categories = ($article instanceof Article && method_exists($article, 'getCategories'))
-                ? $article->getCategories($database_handler)
-                : [];
-
-            $articles_view_data[] = [
-                'id' => $article->id,
-                'title' => $article->title,
-                'date' => $article->date,
-                'user_id' => $article->user_id,
-                'author_name' => $authors_map[$article->user_id] ?? ($article->user_id ? 'User ID: ' . $article->user_id : 'N/A'),
-                'categories' => $categories,
-            ];
+    foreach ($articles_list as $article_instance) {
+        if (!$article_instance instanceof Article) {
+            error_log("Manage Articles: Item in articles_list is not an Article object.");
+            continue;
         }
+        $categories = ($article_instance instanceof Article && method_exists($article_instance, 'getCategories'))
+            ? $article_instance->getCategories($database_handler)
+            : [];
+
+        $articles_view_data[] = [
+            'id' => $article_instance->id,
+            'title' => $article_instance->title,
+            'date' => $article_instance->date,
+            'user_id' => $article_instance->user_id,
+            'author_name' => $authors_map[$article_instance->user_id] ?? ($article_instance->user_id ? 'User ID: ' . $article_instance->user_id : 'N/A'),
+            'categories' => $categories,
+        ];
     }
 }
 ?>
 
 <div class="page-container manage-articles-page">
     <div class="page-header">
-        <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
+        <h1><?php echo htmlspecialchars($page_title); ?></h1>
     </div>
 
-    <?php if (!$db_connection_error && empty($articles_view_data)): ?>
+    <?php if (!$db_connection_error && empty($articles_view_data) && !$total_articles): ?>
         <div class="message message--info message--empty-state">
             <p>No articles found.</p>
+            <?php if ($user_role === User::ROLE_ADMIN || $user_role === User::ROLE_EDITOR): ?>
             <a href="/index.php?page=create_article&from=manage" class="button button-primary">Create the First Article</a>
+            <?php endif; ?>
         </div>
     <?php elseif (!empty($articles_view_data)): ?>
         <div class="table-responsive">
@@ -136,4 +150,27 @@ if (!$database_handler->getConnection()) {
             </table>
         </div>
     <?php endif; ?>
+
+    <?php
+    if ($total_articles > $articles_per_page && ($user_role === User::ROLE_ADMIN)):
+        $total_pages = ceil($total_articles / $articles_per_page);
+        if ($total_pages > 1):
+    ?>
+    <nav class="pagination">
+        <ul class="pagination-list">
+            <?php if ($current_page_get > 1): ?>
+                <li><a href="/index.php?page=manage_articles&p=<?php echo $current_page_get - 1; ?>" class="pagination-link">Previous</a></li>
+            <?php endif; ?>
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <li><a href="/index.php?page=manage_articles&p=<?php echo $i; ?>" class="pagination-link <?php echo ($i == $current_page_get) ? 'is-active' : ''; ?>"><?php echo $i; ?></a></li>
+            <?php endfor; ?>
+            <?php if ($current_page_get < $total_pages): ?>
+                <li><a href="/index.php?page=manage_articles&p=<?php echo $current_page_get + 1; ?>" class="pagination-link">Next</a></li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+    <?php
+        endif;
+    endif;
+    ?>
 </div>

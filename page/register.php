@@ -1,19 +1,21 @@
 <?php
 
+$page_title = "Register";
+
+if (!isset($flashMessageService)) {
+     error_log("Critical: FlashMessageService not available in register.php");
+}
+
 if (isset($_SESSION['user_id'])) {
     header("Location: /index.php?page=account_dashboard");
     exit();
 }
 
-// Form data (if there were validation errors)
 $form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : ['username' => '', 'email' => ''];
-// Errors and success messages are now part of $page_messages, passed from index.php
 
-// Clear form_data after use if needed
 unset($_SESSION['form_data']);
 
-// Use a common CSRF token for registration
-$csrf_token = $_SESSION['csrf_token_register'] ?? ''; // Use csrf_token_register
+$csrf_token = $_SESSION['csrf_token_register'] ?? '';
 if (empty($csrf_token)) {
     $_SESSION['csrf_token_register'] = bin2hex(random_bytes(32));
     $csrf_token = $_SESSION['csrf_token_register'];
@@ -35,18 +37,16 @@ if (empty($csrf_token)) {
     <div class="auth-layout-column auth-layout-column-form">
         <div class="auth-form-card">
             <?php
-            // Display messages from $page_messages
-            if (!empty($page_messages)) { // $page_messages comes from index.php
+            if (!empty($page_messages)) {
                 foreach ($page_messages as $message) {
-                    // Determine class based on message type
-                    $messageTypeClass = 'info'; // default
+                    $messageTypeClass = 'info'; 
                     if (isset($message['type'])) {
                         switch (strtolower($message['type'])) {
                             case 'success':
                                 $messageTypeClass = 'success';
                                 break;
                             case 'error':
-                            case 'errors': // for compatibility
+                            case 'errors':
                                 $messageTypeClass = 'errors';
                                 break;
                             case 'warning':

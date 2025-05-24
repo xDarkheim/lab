@@ -6,120 +6,85 @@ use App\Lib\Database;
 use PDO;
 use PDOException;
 
-class Comments {
+class Comments
+{
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+
     private ?PDO $db;
-    private Database $database_handler;
 
-    public int $id;
-    public int $article_id;
-    public ?int $user_id;
-    public string $author_name;
-    public string $content;
-    public string $created_at;
-    public string $updated_at;
-    public string $status; 
-
-    public function __construct(Database $database_handler) {
-        $this->database_handler = $database_handler;
-        $this->db = $this->database_handler->getConnection();
+    public function __construct(Database $database_handler)
+    {
+        $this->db = $database_handler->getConnection();
     }
 
-    public static function findByArticleId(Database $database_handler, int $article_id, string $status = 'approved'): array {
-        $comments = [];
+    public static function findByArticleId(Database $database_handler, int $article_id, string $status = self::STATUS_APPROVED): array
+    {
         $db = $database_handler->getConnection();
         if (!$db) {
-            error_log("Comments::findByArticleId - Database connection failed.");
-            return $comments;
+            return [];
         }
-
         try {
             $sql = "SELECT c.*, u.username AS author_username 
-                    FROM comments c
-                    LEFT JOIN users u ON c.user_id = u.id
+                    FROM comments c 
+                    LEFT JOIN users u ON c.user_id = u.id 
                     WHERE c.article_id = :article_id AND c.status = :status
-                    ORDER BY c.created_at ASC";
+                    ORDER BY c.created_at DESC";
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':article_id', $article_id, PDO::PARAM_INT);
-            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            $stmt->bindParam(':status', $status, PDO::PARAM_STR); 
             $stmt->execute();
-
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $comment = new self($database_handler);
-                $comment->id = (int)$row['id'];
-                $comment->article_id = (int)$row['article_id'];
-                $comment->user_id = isset($row['user_id']) ? (int)$row['user_id'] : null;
-                $comment->author_name = $row['author_username'] ?? $row['author_name'] ?? 'Anonymous';
-                $comment->content = $row['content'];
-                $comment->created_at = $row['created_at'];
-                $comment->updated_at = $row['updated_at'];
-                $comment->status = $row['status'];
-                $comments[] = $comment;
-            }
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Comments::findByArticleId - PDOException for article_id {$article_id}: " . $e->getMessage());
+            error_log("Error fetching comments by article ID {$article_id}: " . $e->getMessage());
+            return [];
         }
-        return $comments;
     }
 
-    public static function create(Database $database_handler, array $data): int|false {
-        $db = $database_handler->getConnection();
-        if (!$db) {
-            error_log("Comments::create - Database connection failed.");
+    public function addComment(int $article_id, ?int $user_id, string $content, ?string $author_name = null, string $status = self::STATUS_PENDING): bool
+    {
+        if (!$this->db) {
             return false;
         }
-
-        $sql = "INSERT INTO comments (article_id, user_id, author_name, content, status, created_at, updated_at) 
-                VALUES (:article_id, :user_id, :author_name, :content, :status, NOW(), NOW())";
-        
         try {
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':article_id', $data['article_id'], PDO::PARAM_INT);
-            if (is_null($data['user_id'])) {
+            $sql = "INSERT INTO comments (article_id, user_id, author_name, content, status, created_at, updated_at) 
+                    VALUES (:article_id, :user_id, :author_name, :content, :status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':article_id', $article_id, PDO::PARAM_INT);
+            if ($user_id === null) {
                 $stmt->bindValue(':user_id', null, PDO::PARAM_NULL);
             } else {
-                $stmt->bindParam(':user_id', $data['user_id'], PDO::PARAM_INT);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
             }
-            $stmt->bindParam(':author_name', $data['author_name'], PDO::PARAM_STR);
-            $stmt->bindParam(':content', $data['content'], PDO::PARAM_STR);
-            $stmt->bindParam(':status', $data['status'], PDO::PARAM_STR); 
-
-            if ($stmt->execute()) {
-                return (int)$db->lastInsertId();
+            if ($author_name === null) {
+                $stmt->bindValue(':author_name', null, PDO::PARAM_NULL);
             } else {
-                error_log("Comments::create - Failed to execute statement: " . implode(":", $stmt->errorInfo()));
-                return false;
+                $stmt->bindParam(':author_name', $author_name, PDO::PARAM_STR);
             }
+            $stmt->bindParam(':content', $content, PDO::PARAM_STR);
+            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            return $stmt->execute();
         } catch (PDOException $e) {
-            error_log("Comments::create - PDOException: " . $e->getMessage());
+            error_log("Error adding comment: " . $e->getMessage());
             return false;
         }
     }
-
-
-    public function updateStatus(int $comment_id, string $new_status): bool {
-        if (!$this->db) return false;
+    
+    public function updateStatus(int $comment_id, string $new_status): bool
+    {
+        if (!$this->db || !in_array($new_status, [self::STATUS_APPROVED, self::STATUS_PENDING, self::STATUS_REJECTED])) {
+            return false;
+        }
         try {
-            $sql = "UPDATE comments SET status = :status, updated_at = NOW() WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare("UPDATE comments SET status = :status, updated_at = CURRENT_TIMESTAMP WHERE id = :id");
             $stmt->bindParam(':status', $new_status, PDO::PARAM_STR);
             $stmt->bindParam(':id', $comment_id, PDO::PARAM_INT);
             return $stmt->execute();
         } catch (PDOException $e) {
-            error_log("Comments::updateStatus - PDOException for comment_id {$comment_id}: " . $e->getMessage());
+            error_log("Error updating comment status: " . $e->getMessage());
             return false;
         }
     }
 
-    public function delete(int $comment_id): bool {
-        if (!$this->db) return false;
-        try {
-            $sql = "DELETE FROM comments WHERE id = :id";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':id', $comment_id, PDO::PARAM_INT);
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Comments::delete - PDOException for comment_id {$comment_id}: " . $e->getMessage());
-            return false;
-        }
-    }
 }

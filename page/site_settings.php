@@ -4,12 +4,13 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+use App\Models\User;
+
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== User::ROLE_ADMIN) {
     echo "<div class='message message--error'><p>Access Denied. You do not have permission to view this page.</p></div>";
     return;
 }
 
-use App\Lib\FlashMessageService;
 use App\Lib\SettingsManager;
 
 $page_title = "Site Settings";
@@ -23,8 +24,16 @@ if (!isset($settingsManager) || !$settingsManager instanceof SettingsManager) {
     $settingsManager = new SettingsManager($database_handler);
 }
 
-if (!isset($flashMessageService) || !$flashMessageService instanceof FlashMessageService) {
-    $flashMessageService = new FlashMessageService();
+if (!isset($flashMessageService)) {
+    error_log("Critical: FlashMessageService not available in site_settings.php");
+    echo "<p class='message message--error'>An unexpected error occurred (Flash service unavailable).</p>";
+    return;
+}
+
+if (!isset($db) || !$db instanceof PDO) {
+    $flashMessageService->addError("Database connection is not available.");
+    header('Location: /index.php?page=home');
+    exit();
 }
 
 $settings = $settingsManager->getAllSettings();

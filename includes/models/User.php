@@ -5,16 +5,20 @@ use App\Lib\Database;
 use PDO;
 
 class User {
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_EDITOR = 'editor';
+    public const ROLE_USER = 'user';
+
     private ?int $id = null;
     private string $username;
     private ?string $email = null;
     private ?string $password_hash = null;
-    private ?string $role = 'user'; // Default role for new users
+    private ?string $role = 'user';
     private ?string $created_at = null;
-    private ?string $location = null;        // New property
-    private ?string $user_status = null;     // New property (renamed from status to avoid conflict)
-    private ?string $bio = null;             // New property
-    private ?string $website_url = null;     // New property
+    private ?string $location = null;
+    private ?string $user_status = null;
+    private ?string $bio = null;
+    private ?string $website_url = null;
 
     private Database $db_handler;
 
@@ -93,7 +97,7 @@ class User {
     public function setWebsiteUrl(?string $website_url): void {
         $url = $website_url ? trim($website_url) : null;
         if ($url && !preg_match("~^(?:f|ht)tps?://~i", $url)) {
-            $url = "http://" . $url; // Basic prefixing if scheme is missing
+            $url = "http://" . $url;
         }
         $this->website_url = $url;
     }
@@ -103,7 +107,6 @@ class User {
         if (!$conn) return false;
 
         if ($this->id) {
-            // Update existing user
             $sql = "UPDATE users SET username = ?, email = ?, password_hash = ?, role = ?, location = ?, user_status = ?, bio = ?, website_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt === false) {
@@ -126,7 +129,6 @@ class User {
             }
             return $result;
         } else {
-            // Insert new user
             $sql = "INSERT INTO users (username, email, password_hash, role, created_at, location, user_status, bio, website_url) VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt === false) {
@@ -192,31 +194,29 @@ class User {
         return null;
     }
 
-    public static function findById(Database $db_handler, int $id): ?self {
-        $conn = $db_handler->getConnection();
-        if (!$conn) return null;
-
-        $stmt = $conn->prepare("SELECT id, username, email, password_hash, role, created_at, location, user_status, bio, website_url FROM users WHERE id = ?");
-        if ($stmt === false) {
-            error_log("Failed to prepare statement for findById: " . implode(":", $conn->errorInfo()));
+    public function findById(int $id): ?self 
+    {
+        $conn = $this->db_handler->getConnection();
+        if (!$conn) {
+            error_log("User::findById - Database connection failed.");
             return null;
         }
-        $stmt->execute([$id]);
-        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $conn->prepare("SELECT * FROM users WHERE id = :id");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($userData) {
-            $user = new self($db_handler);
-            $user->id = (int)$userData['id'];
-            $user->username = $userData['username'];
-            $user->email = $userData['email'];
-            $user->password_hash = $userData['password_hash'];
-            $user->role = $userData['role'] ?? 'user';
-            $user->created_at = $userData['created_at'];
-            $user->location = $userData['location'];
-            $user->user_status = $userData['user_status'];
-            $user->bio = $userData['bio'];
-            $user->website_url = $userData['website_url'];
-            return $user;
+            if ($userData) {
+                $this->id = (int)$userData['id'];
+                $this->username = $userData['username'];
+                $this->email = $userData['email'];
+                $this->role = $userData['role'];
+                $this->created_at = $userData['created_at'];
+                return $this; 
+            }
+        } catch (\PDOException $e) {
+            error_log("User::findById - PDOException for ID {$id}: " . $e->getMessage());
         }
         return null;
     }
@@ -227,7 +227,7 @@ class User {
 
     public function updatePassword(string $newPasswordHash): bool {
         if ($this->id === null) {
-            return false; // User not loaded
+            return false;
         }
         $conn = $this->db_handler->getConnection();
         if (!$conn) return false;
@@ -240,7 +240,7 @@ class User {
         }
         $result = $stmt->execute([$newPasswordHash, $this->id]);
         if ($result) {
-            $this->password_hash = $newPasswordHash; // Update object property
+            $this->password_hash = $newPasswordHash;
         } else {
             error_log("User model: Failed to execute statement for updating password: " . implode(":", $stmt->errorInfo()));
         }
@@ -249,7 +249,7 @@ class User {
 
     public function updateEmail(string $newEmail): bool {
         if ($this->id === null) {
-            return false; // User not loaded
+            return false;
         }
         if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
             error_log("User model: Invalid email format for update: " . $newEmail);
@@ -267,7 +267,7 @@ class User {
         }
         $result = $stmt->execute([$newEmail, $this->id]);
         if ($result) {
-            $this->email = $newEmail; // Update object property
+            $this->email = $newEmail;
         } else {
             error_log("User model: Failed to execute statement for updating email: " . implode(":", $stmt->errorInfo()));
         }
@@ -316,6 +316,15 @@ class User {
             error_log("User model (updateDetails): Failed to execute statement: " . implode(":", $stmt->errorInfo()));
         }
         return $result;
+    }
+
+    public static function getAvailableRoles(): array
+    {
+        return [
+            self::ROLE_USER,
+            self::ROLE_EDITOR,
+            self::ROLE_ADMIN,
+        ];
     }
 }
 ?>

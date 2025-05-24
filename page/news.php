@@ -1,11 +1,8 @@
 <?php
-use App\Models\Article;
-use App\Models\User;
 use App\Models\Comments;
+use App\Models\Article;
 use App\Models\Category;
-use App\Lib\Database;
-
-// Start session if not already started by bootstrap.php
+use App\Models\User;
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,71 +13,119 @@ $allCategories = [];
 $selectedArticleViewCategories = [];
 $selectedCategorySlug = filter_input(INPUT_GET, 'category', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 $articleId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-$pageTitle = "News Feed"; // Default page title
+$pageTitle = "News Feed";
 $errorMessage = null;
 
-$database_handler = new Database();
+if (!isset($db) || !$db instanceof PDO) {
+    if (isset($flashMessageService)) {
+        $flashMessageService->addError("Database connection is not available.");
+    }
+    echo "<p class='message message--error'>Database connection error. Please try again later.</p>";
+    return; 
+}
 
-if (!$database_handler->getConnection()) {
-    $errorMessage = "Failed to connect to the database. Please check the configuration.";
-} else {
-    // Always load all categories for the filter if the database connection exists
-    $allCategories = Category::findAll($database_handler);
+$allCategories = Category::findAll($database_handler);
 
-    if ($articleId !== null && $articleId > 0) {
-        // Logic for displaying a single article
-        $selectedArticle = Article::findById($database_handler, $articleId);
-        if ($selectedArticle) {
-            $pageTitle = htmlspecialchars($selectedArticle->title);
-            if (method_exists($selectedArticle, 'getCategories')) {
-                $categoriesData = $selectedArticle->getCategories($database_handler);
-                if (is_array($categoriesData)) {
-                    $selectedArticleViewCategories = $categoriesData;
-                }
+if ($articleId !== null && $articleId > 0) {
+   $selectedArticle = Article::findById($database_handler, $articleId);
+    if ($selectedArticle) {
+        $pageTitle = htmlspecialchars($selectedArticle->title);
+        if (method_exists($selectedArticle, 'getCategories')) {
+            $categoriesData = $selectedArticle->getCategories($database_handler);
+            if (is_array($categoriesData)) {
+                $selectedArticleViewCategories = $categoriesData;
             }
-        } else {
-            $errorMessage = "News article with ID {$articleId} not found.";
         }
-    } elseif ($articleId !== null && $articleId <= 0) {
-        // Logic for invalid article ID
-        $errorMessage = "Invalid news ID specified.";
     } else {
-        // Logic for displaying a list of articles (possibly filtered by category)
-        $pageTitle = "News Feed"; // Reset to default if no category is found
+        $errorMessage = "News article with ID {$articleId} not found.";
+    }
+} elseif ($articleId !== null && $articleId <= 0) {
+    $errorMessage = "Invalid news ID specified.";
+} else {
+    $pageTitle = "News Feed";
 
-        if ($selectedCategorySlug) {
-            $categoryObject = Category::findBySlug($database_handler, $selectedCategorySlug);
-            if ($categoryObject) {
-                $newsArticles = Article::findByCategoryId($database_handler, $categoryObject->id);
-                $pageTitle = "News: " . htmlspecialchars($categoryObject->name);
-                if (empty($newsArticles)) {
-                    $errorMessage = "No news articles found in the category: " . htmlspecialchars($categoryObject->name) . ".";
-                }
-            } else {
-                $errorMessage = "Category '" . htmlspecialchars($selectedCategorySlug) . "' not found.";
+    if ($selectedCategorySlug) {
+        $categoryObject = Category::findBySlug($database_handler, $selectedCategorySlug);
+        if ($categoryObject) {
+            $newsArticles = Article::findByCategoryId($database_handler, $categoryObject->id);
+            $pageTitle = "News: " . htmlspecialchars($categoryObject->name);
+            if (empty($newsArticles)) {
+                $errorMessage = "No news articles found in the category: " . htmlspecialchars($categoryObject->name) . ".";
             }
         } else {
-            // No article ID and no category - show all articles
-            $newsArticles = Article::findAll($database_handler);
+            $errorMessage = "Category '" . htmlspecialchars($selectedCategorySlug) . "' not found.";
         }
+    } else {
+        $newsArticles = Article::findAll($database_handler);
+    }
 
-        // General message if no articles are found and no specific error was set
-        if (empty($newsArticles) && !$errorMessage) {
-            $errorMessage = "No news articles found at the moment.";
-        }
+    if (empty($newsArticles) && !$errorMessage) {
+        $errorMessage = "No news articles found at the moment.";
     }
 }
 
-// Generate CSRF for the comment form if the user is logged in and a selected article exists
 if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_token_add_comment_article_' . $selectedArticle->id])) {
     $_SESSION['csrf_token_add_comment_article_' . $selectedArticle->id] = bin2hex(random_bytes(32));
+}
+
+
+
+if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === User::ROLE_ADMIN) {
+    if (isset($_GET['action'], $_GET['comment_id'], $_GET['article_id'], $_GET['csrf_token'])) {
+        if (hash_equals($_SESSION['csrf_token'] ?? '', $_GET['csrf_token'])) {
+            $action = $_GET['action'];
+            $comment_id_to_manage = filter_var($_GET['comment_id'], FILTER_VALIDATE_INT);
+            $article_id_redirect = filter_var($_GET['article_id'], FILTER_VALIDATE_INT);
+            $commentModelForAction = new Comments($database_handler); 
+            if ($comment_id_to_manage && $article_id_redirect) {
+                $success = false;
+                if ($action === 'approve_comment') {
+                    $success = $commentModelForAction->updateStatus($comment_id_to_manage, Comments::STATUS_APPROVED);
+                    if ($success && isset($flashMessageService)) $flashMessageService->addSuccess("Comment approved.");
+                } elseif ($action === 'reject_comment') {
+                    $success = $commentModelForAction->updateStatus($comment_id_to_manage, Comments::STATUS_REJECTED);
+                    if ($success && isset($flashMessageService)) $flashMessageService->addSuccess("Comment rejected.");
+                } elseif ($action === 'pend_comment') {
+                    $success = $commentModelForAction->updateStatus($comment_id_to_manage, Comments::STATUS_PENDING);
+                    if ($success && isset($flashMessageService)) $flashMessageService->addSuccess("Comment status set to pending.");
+                }
+
+
+                if (!$success && $action !== 'delete_comment' && isset($flashMessageService)) {
+                     $flashMessageService->addError("Failed to update comment status.");
+                }
+
+                header("Location: /index.php?page=news&id=" . $article_id_redirect . "#comment-" . $comment_id_to_manage);
+                exit();
+            }
+        } else {
+            if (isset($flashMessageService)) $flashMessageService->addError("Invalid security token for comment action.");
+        }
+    }
+
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_comment') {
+        if (isset($_POST['comment_id'], $_POST['article_id'], $_POST['csrf_token'])) {
+            if (hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
+                $comment_id_to_delete = filter_var($_POST['comment_id'], FILTER_VALIDATE_INT);
+                $article_id_redirect = filter_var($_POST['article_id'], FILTER_VALIDATE_INT);
+                 if (isset($flashMessageService)) $flashMessageService->addError("Delete comment logic not yet implemented."); // Заглушка
+            } else {
+                 if (isset($flashMessageService)) $flashMessageService->addError("Invalid security token for deleting comment.");
+            }
+            $article_id_redirect_val = filter_var($_POST['article_id'] ?? 0, FILTER_VALIDATE_INT);
+            if ($article_id_redirect_val) {
+                 header("Location: /index.php?page=news&id=" . $article_id_redirect_val);
+                 exit();
+            }
+        }
+    }
 }
 
 ?>
 
 <div class="page-container news-page-container">
     <?php 
-    // Display error messages
     if ($errorMessage): 
     ?>
         <div class="message message--error">
@@ -88,8 +133,7 @@ if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_to
         </div>
     <?php endif; ?>
 
-    <?php // --- START: Category selection block --- ?>
-    <?php if (!$selectedArticle && !empty($allCategories)): // Show categories if not viewing a single article and categories exist ?>
+    <?php if (!$selectedArticle && !empty($allCategories)): ?>
     <div class="category-filter-section">
         <h3 class="category-filter-title">Browse by Category:</h3>
         <ul class="category-filter-list">
@@ -100,7 +144,6 @@ if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_to
         </ul>
     </div>
     <?php endif; ?>
-    <?php // --- END: Category selection block --- ?>
 
     <?php if ($selectedArticle): ?>
         <article class="single-article">
@@ -157,15 +200,41 @@ if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_to
             <div class="comments-section">
                 <h2 class="comments-section-title">Comments</h2>
                 <?php
-                $comments_list = Comments::findByArticleId($database_handler, $selectedArticle->id, 'approved');
+                $comments_list = Comments::findByArticleId($database_handler, $selectedArticle->id, Comments::STATUS_APPROVED);
                 if (!empty($comments_list)): ?>
                     <div class="comments-list">
                         <?php foreach ($comments_list as $comment_item): ?>
-                            <div class="comment-item" id="comment-<?php echo $comment_item->id; ?>">
-                                <p class="comment-author"><strong><?php echo htmlspecialchars($comment_item->author_name); ?></strong>
-                                    <span class="comment-date"> - <?php echo htmlspecialchars(date('F j, Y, g:i a', strtotime($comment_item->created_at))); ?></span>
+                            <div class="comment-item" id="comment-<?php echo htmlspecialchars($comment_item['id']); ?>">
+                                <p class="comment-author">
+                                    <strong>
+                                        <?php
+                                        echo htmlspecialchars($comment_item['author_username'] ?? ($comment_item['author_name'] ?? 'Anonymous'));
+                                        ?>
+                                    </strong>
+                                    <span class="comment-date"> - <?php echo htmlspecialchars(date('F j, Y, g:i a', strtotime($comment_item['created_at'])));?></span>
                                 </p>
-                                <div class="comment-content"><?php echo nl2br(htmlspecialchars($comment_item->content)); ?></div>
+                                <div class="comment-content"><?php echo nl2br(htmlspecialchars($comment_item['content'])); ?></div>
+
+                                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === User::ROLE_ADMIN && isset($csrf_token)): ?>
+                                    <div class="comment-actions admin-actions" style="font-size: 0.9em; margin-top: 5px;">
+                                        Current status: <?php echo htmlspecialchars(ucfirst($comment_item['status'])); ?>
+                                        <?php if ($comment_item['status'] !== Comments::STATUS_APPROVED): ?>
+                                            <a href="/index.php?page=news&action=approve_comment&comment_id=<?php echo $comment_item['id']; ?>&article_id=<?php echo $selectedArticle->id; ?>&csrf_token=<?php echo htmlspecialchars($csrf_token); ?>" class="button button-small button-success">Approve</a>
+                                        <?php endif; ?>
+                                        <?php if ($comment_item['status'] !== Comments::STATUS_REJECTED): ?>
+                                            <a href="/index.php?page=news&action=reject_comment&comment_id=<?php echo $comment_item['id']; ?>&article_id=<?php echo $selectedArticle->id; ?>&csrf_token=<?php echo htmlspecialchars($csrf_token); ?>" class="button button-small button-warning">Reject</a>
+                                        <?php endif; ?>
+                                        <?php if ($comment_item['status'] !== Comments::STATUS_PENDING && $comment_item['status'] === Comments::STATUS_APPROVED): ?>
+                                             <a href="/index.php?page=news&action=pend_comment&comment_id=<?php echo $comment_item['id']; ?>&article_id=<?php echo $selectedArticle->id; ?>&csrf_token=<?php echo htmlspecialchars($csrf_token); ?>" class="button button-small button-secondary">Set to Pending</a>
+                                        <?php endif; ?>
+                                        <form action="/index.php?page=news&action=delete_comment" method="POST" onsubmit="return confirm('Are you sure?');" style="display:inline;">
+                                            <input type="hidden" name="comment_id" value="<?php echo $comment_item['id']; ?>">
+                                            <input type="hidden" name="article_id" value="<?php echo $selectedArticle->id; ?>">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+                                            <button type="submit" class="button button-small button-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -179,7 +248,8 @@ if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_to
                         <input type="hidden" name="article_id" value="<?php echo htmlspecialchars($selectedArticle->id); ?>">
                         <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($_SESSION['user_id']); ?>">
                         <?php
-                        $current_user_for_comment = User::findById($database_handler, $_SESSION['user_id']);
+                        $user_model_for_comment = new User($database_handler);
+                        $current_user_for_comment = $user_model_for_comment->findById((int)$_SESSION['user_id']); // ИЗМЕНЕНО
                         $author_name_for_comment = $current_user_for_comment ? $current_user_for_comment->getUsername() : 'Registered User';
                         ?>
                         <input type="hidden" name="author_name" value="<?php echo htmlspecialchars($author_name_for_comment); ?>">
@@ -205,13 +275,12 @@ if ($selectedArticle && isset($_SESSION['user_id']) && !isset($_SESSION['csrf_to
                         <span class="date">Published on: <?php echo htmlspecialchars(date('F j, Y', strtotime($article_item->date))); ?></span>
                         <?php if ($article_item->user_id): ?>
                             <?php
-                            $author = User::findById($database_handler, $article_item->user_id);
+                            $userModel = new User($database_handler);
+                            $author = $userModel->findById($article_item->user_id);
                             echo $author ? ' by <span class="author-name">' . htmlspecialchars($author->getUsername()) . '</span>' : '';
                             ?>
                         <?php endif; ?>
-                         <?php
-                        // Display categories for articles in the feed
-                        if (method_exists($article_item, 'getCategories')) {
+                        <?php if (method_exists($article_item, 'getCategories')) {
                             $articleCategories = $article_item->getCategories($database_handler);
                             if (!empty($articleCategories)) {
                                 echo '<div class="article-categories-display article-categories-feed">'; 

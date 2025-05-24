@@ -4,7 +4,9 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+use App\Models\User;
+
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== User::ROLE_ADMIN) {
     if (isset($flashMessageService) && $flashMessageService instanceof \App\Lib\FlashMessageService) {
         $flashMessageService->addError("Access Denied. You do not have permission to view this page.");
     }
@@ -123,7 +125,7 @@ if (empty($csrf_token) && function_exists('random_bytes')) {
         <?php if (empty($users) && empty($errors)): ?>
             <div class="message message--info" style="padding: var(--spacing-5); text-align: center;">
                 <p style="font-size: 1.1rem; margin-bottom: var(--spacing-3);">No users found in the system.</p>
-                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === User::ROLE_ADMIN): ?>
                 <p>
                     <a href="/index.php?page=create_user" class="button button-secondary">
                         <i class="fas fa-user-plus"></i> Create the First User

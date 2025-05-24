@@ -16,7 +16,8 @@ class ProfileController {
 
     private function loadUser(): ?User {
         if ($this->user === null) {
-            $this->user = User::findById($this->db_handler, $this->userId);
+            $userInstance = new User($this->db_handler);
+            $this->user = $userInstance->findById($this->userId);
         }
         return $this->user;
     }

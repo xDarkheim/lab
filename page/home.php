@@ -13,7 +13,6 @@
     <h2 class="section-title">Recent Articles</h2>
     <div class="posts-grid">
         <?php
-        global $db; 
         $recent_articles = []; 
 
         if (!$db) {

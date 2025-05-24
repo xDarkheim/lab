@@ -101,6 +101,8 @@ WebEngine Darkheim is a web application focused on providing a resource hub for 
       `email` varchar(255) NOT NULL,
       `password_hash` varchar(255) NOT NULL,
       `role` varchar(50) DEFAULT 'user', -- e.g., 'user', 'editor', 'admin'
+      `reset_token_hash` VARCHAR(255) NULL DEFAULT NULL,
+      `reset_token_expires_at` DATETIME NULL DEFAULT NULL,
       `location` varchar(255) DEFAULT NULL,
       `user_status` varchar(255) DEFAULT NULL,
       `bio` text DEFAULT NULL,
@@ -172,10 +174,6 @@ WebEngine Darkheim is a web application focused on providing a resource hub for 
     ('site_name', 'Darkheim WebEngine'),
     ('site_tagline', 'Your Hub for Web Development Insights'),
     ('admin_email', 'admin@example.com');
-
-    ALTER TABLE `users`
-    ADD COLUMN `reset_token_hash` VARCHAR(255) NULL DEFAULT NULL AFTER `role`,
-    ADD COLUMN `reset_token_expires_at` DATETIME NULL DEFAULT NULL AFTER `reset_token_hash`;
     ```
 
 4.  **Permissions**: Ensure the web server has appropriate write permissions for any directories that require it (e.g., if you plan to have file uploads or a server-side cache).

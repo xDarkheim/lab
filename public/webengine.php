@@ -1,5 +1,4 @@
 <?php
-require_once dirname(__DIR__) . '/includes/config/app_config.php'; 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 use App\Lib\Database;
